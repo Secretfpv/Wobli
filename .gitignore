@@ -1,4 +1,4 @@
-local-files/.data/
+#local-files/.data/
 local-files/.venv/
 local-files/archive/previous-venv/
 **/__pycache__/
