@@ -38,7 +38,7 @@ def validate_product(data, categories=None):
         return value
     product = {key: string(key, limit, required) for key, limit, required in (
         ('name', 140, True), ('sku', 80, True), ('description', 3000, False),
-        ('lead_time', 240, False), ('image', 200, False))}
+        ('admin_comment', 3000, False), ('lead_time', 240, False), ('image', 200, False))}
     images = data.get('images', [product['image']] if product['image'] else [])
     if not isinstance(images, list) or len(images) > 12 or any(not isinstance(image, str) or not image or len(image) > 200 for image in images):
         raise ValueError('Choose up to 12 valid product images.')
@@ -163,7 +163,14 @@ class Store:
     def products(self, admin=False):
         with self.connect() as db:
             products = [self.decode(row) for row in db.execute('SELECT * FROM products ORDER BY updated_at DESC, id')]
-        return products if admin else [p for p in products if p['status'] == 'active']
+        if admin:
+            return products
+        public_products = []
+        for product in products:
+            if product['status'] == 'active':
+                product.pop('admin_comment', None)
+                public_products.append(product)
+        return public_products
 
     def categories(self):
         with self.connect() as db:
