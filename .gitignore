@@ -1,0 +1,8 @@
+local-files/.data/
+local-files/.venv/
+local-files/archive/previous-venv/
+**/__pycache__/
+*.pyc
+.DS_Store
+.env
+local-files/archive/previous-server-venv/

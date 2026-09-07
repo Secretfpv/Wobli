@@ -1,0 +1,521 @@
+/* Taillight LED: mirrored sweeps from top centre to bottom centre, with a crimson halo. */
+@property --section-led-angle {
+  syntax:"<angle>";
+  initial-value:0deg;
+  inherits:false
+}
+
+.home-cta .cta-panel {
+  position:relative
+}
+
+.brand-sections .brand-copy,.home-cta .cta-panel {
+  --led-core:#ff786b;
+  --led-halo:#ff1028
+}
+
+.section-led-halo {
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  filter:blur(4px) drop-shadow(0 0 8px rgba(255,0,30,.75))
+}
+
+.brand-sections .brand-copy::before, .home-cta .cta-panel::before, .section-led-halo::before {
+  content:"";
+  position:absolute;
+  inset:3px;
+  padding:1.5px;
+  pointer-events:none;
+  opacity:0;
+  background:conic-gradient(from 0deg,var(--led-core) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),var(--led-core) calc(360deg - var(--section-led-angle)) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  transition:opacity .18s ease;
+}
+
+.section-led-halo::before {
+  padding:5px;
+  background:conic-gradient(from 0deg,var(--led-halo) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),var(--led-halo) calc(360deg - var(--section-led-angle)) 360deg)
+}
+
+.home-cta .cta-panel::before,.home-cta .section-led-halo::before {
+  border-radius:27px
+}
+
+@keyframes sectionLedSweep {
+  from {
+    --section-led-angle:0deg
+  }
+  to {
+    --section-led-angle:180deg
+  }
+}
+
+@media(hover:hover) {
+  .brand-sections .brand-section:hover .brand-copy::before, .brand-sections .brand-section:hover .section-led-halo::before, .home-cta .cta-panel:hover::before, .home-cta .cta-panel:hover .section-led-halo::before {
+    opacity:1;
+    animation:sectionLedSweep .45s linear 1 forwards
+  }
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .brand-sections .brand-section:hover .brand-copy::before, .brand-sections .brand-section:hover .section-led-halo::before, .home-cta .cta-panel:hover::before, .home-cta .cta-panel:hover .section-led-halo::before {
+    animation:none;
+    --section-led-angle:180deg;
+    transition:none
+  }
+}
+
+/* Button LEDs match the panel glow without changing layout or hit targets. */
+:where(button.led-button) {
+  position:relative
+}
+
+.led-button {
+  --button-led-core:#ff786b;
+  --button-led-halo:#ff1028
+}
+
+.navtab.led-button {
+  overflow:visible
+}
+
+.navtab.led-button::after {
+  content:none
+}
+
+.button-led-core,.button-led-halo {
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  pointer-events:none;
+  z-index:1
+}
+
+.button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 5px rgba(255,0,30,.65))
+}
+
+.button-led-core::before,.button-led-halo::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:1.5px;
+  opacity:0;
+  pointer-events:none;
+  background:conic-gradient(from 0deg,var(--button-led-core) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),var(--button-led-core) calc(360deg - var(--section-led-angle)) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  transition:opacity .18s ease;
+}
+
+.button-led-halo::before {
+  padding:3px;
+  background:conic-gradient(from 0deg,var(--button-led-halo) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),var(--button-led-halo) calc(360deg - var(--section-led-angle)) 360deg)
+}
+
+@media(hover:hover) {
+  .led-button:not(:disabled):hover > .button-led-core::before, .led-button:not(:disabled):hover > .button-led-halo::before {
+    opacity:1;
+    animation:sectionLedSweep .45s linear 1 forwards
+  }
+}
+
+.led-button:not(:disabled):focus-visible > .button-led-core::before, .led-button:not(:disabled):focus-visible > .button-led-halo::before {
+  opacity:1;
+  animation:sectionLedSweep .45s linear 1 forwards
+}
+
+@media(prefers-reduced-motion:reduce) {
+  .led-button:not(:disabled):is(:hover,:focus-visible) > .button-led-core::before, .led-button:not(:disabled):is(:hover,:focus-visible) > .button-led-halo::before {
+    animation:none;
+    --section-led-angle:180deg;
+    transition:none
+  }
+}
+
+/* Floating Custom Lab: synchronized amber border and arrow signals. */
+#labShortcut {
+  --button-led-core:#ffd182;
+  --button-led-halo:#ff8908
+}
+
+#labShortcut .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 7px rgba(255,128,0,.8))
+}
+
+#labShortcut .lab-arrow {
+  color:#ffb347;
+  opacity:1
+}
+
+#labShortcut:hover,#labShortcut:focus-visible {
+  border-color:#ffac4750
+}
+
+@keyframes labTurnSignal {
+  0%,49% {
+    opacity:1
+  }
+  50%,100% {
+    opacity:0
+  }
+}
+
+@keyframes labArrowReturn {
+  from {
+    opacity:0
+  }
+  to {
+    opacity:1
+  }
+}
+
+#labShortcut > .button-led-core::before, #labShortcut > .button-led-halo::before {
+  --section-led-angle:180deg;
+  animation:none;
+  opacity:0;
+  transition:none
+}
+
+#labShortcut.lab-signaling > .button-led-core::before, #labShortcut.lab-signaling > .button-led-halo::before {
+  animation:labTurnSignal .7s steps(1,end) 3 forwards
+}
+
+#labShortcut.lab-signaling .lab-arrow {
+  animation:labTurnSignal .7s steps(1,end) 3 forwards,labArrowReturn .35s ease 2.6s 1 forwards;
+}
+
+@media(prefers-reduced-motion:reduce) {
+  #labShortcut.lab-signaling > .button-led-core::before, #labShortcut.lab-signaling > .button-led-halo::before {
+    animation:none;
+    opacity:0
+  }
+  #labShortcut.lab-signaling .lab-arrow {
+    animation:none;
+    opacity:1
+  }
+  #labShortcut:is(:hover,:focus-visible) > .button-led-core::before, #labShortcut:is(:hover,:focus-visible) > .button-led-halo::before {
+    opacity:1
+  }
+}
+
+/* Headlights: illuminated white edges and a dark lens instead of a flat white fill. */
+.btn.primary,.shop-tab.active {
+  color:#f7fbff;
+  border-color:rgba(226,242,255,.6);
+  background:radial-gradient(ellipse at 50% 0%,rgba(230,245,255,.28),transparent 72%),linear-gradient(180deg,#29333e,#141b23);
+  box-shadow:inset 0 1px 2px rgba(255,255,255,.75),inset 0 0 12px rgba(214,237,255,.16),0 0 2px rgba(243,250,255,.9),0 0 15px rgba(216,237,255,.2);
+  text-shadow:0 0 10px rgba(222,241,255,.3);
+}
+
+/* Brake-light response: immediate full brightness while physically pressed. */
+.led-button:not(:disabled):active {
+  --button-led-core:#ffd0bf;
+  --button-led-halo:#ff0024;
+  border-color:#ff6974;
+  color:#fff;
+  box-shadow:inset 0 0 15px rgba(255,24,48,.28),0 0 6px rgba(255,45,64,.65),0 0 24px rgba(255,0,30,.4);
+}
+
+.led-button:not(:disabled):active > .button-led-core::before, .led-button:not(:disabled):active > .button-led-halo::before {
+  --section-led-angle:180deg;
+  opacity:1;
+  animation:none;
+  transition:none
+}
+
+.led-button:not(:disabled):active > .button-led-core::before {
+  padding:2px
+}
+
+.led-button:not(:disabled):active > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 10px rgba(255,0,30,.95))
+}
+
+.led-button:not(:disabled):active > .button-led-halo::before {
+  padding:5px
+}
+
+/* Preserve the Custom Lab indicator's distinct amber identity. */
+#labShortcut:not(:disabled):active {
+  --button-led-core:#fff0c4;
+  --button-led-halo:#ff9400;
+  border-color:#ffd080;
+  box-shadow:inset 0 0 15px rgba(255,145,24,.25),0 0 6px rgba(255,167,45,.65),0 0 24px rgba(255,128,0,.4);
+}
+
+#labShortcut:not(:disabled):active > .button-led-core::before, #labShortcut:not(:disabled):active > .button-led-halo::before {
+  --section-led-angle:180deg;
+  opacity:1;
+  animation:none
+}
+
+#labShortcut:not(:disabled):active > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 10px rgba(255,128,0,.95))
+}
+
+#labShortcut:not(:disabled):active .lab-arrow {
+  color:#ffe0a6;
+  opacity:1;
+  animation:none
+}
+/* Mouse light sits above page backgrounds and below opaque content surfaces.
+   Keep the hero copy (3), navigation (100) and dialogs above it as well. */
+.cursor-glow { z-index:1; }
+.view .panel,
+.view .card,
+.view .shop-card,
+.view .admin-stat,
+.view .admin-catalogue,
+.view .admin-editor,
+.view .admin-security,
+.view .profile-navigation,
+.view .profile-panel {
+  position:relative;
+  z-index:2;
+}
+.view .shop-sidebar { z-index:2; }
+
+/* Product cards: availability colours with mirrored LED sweeps. */
+.shop-card { --card-led-core:#83f7ff; --card-led-rgb:0,213,255; --card-led-glow:0 0 20px rgba(var(--card-led-rgb),.34),0 0 38px rgba(var(--card-led-rgb),.2); overflow:visible; transition:box-shadow .3s ease; }
+.shop-card[data-availability="in-stock"],.product-dialog[data-availability="in-stock"],.question-dialog[data-availability="in-stock"] { --card-led-core:#a0ffbe; --card-led-rgb:35,235,108; }
+.shop-card[data-availability="out-of-stock"],.product-dialog[data-availability="out-of-stock"],.question-dialog[data-availability="out-of-stock"] { --card-led-core:#ff897d; --card-led-rgb:255,35,58; }
+.shop-card[data-availability="coming-soon"],.product-dialog[data-availability="coming-soon"],.question-dialog[data-availability="coming-soon"] { --card-led-core:#ffd091; --card-led-rgb:255,148,31; }
+.shop-card .product-card-open { border-radius:21px 21px 0 0; overflow:hidden; }
+.shop-card::before,
+.shop-card::after {
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:inherit;
+  padding:1.5px;
+  z-index:5;
+  pointer-events:none;
+  opacity:0;
+  background:conic-gradient(from 0deg,var(--card-led-core) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),var(--card-led-core) calc(360deg - var(--section-led-angle)) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  transition:opacity .18s ease;
+}
+.shop-card::after {
+  padding:3px;
+  background:conic-gradient(from 0deg,rgb(var(--card-led-rgb)) 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),rgb(var(--card-led-rgb)) calc(360deg - var(--section-led-angle)) 360deg);
+  filter:blur(3px) drop-shadow(0 0 9px rgba(var(--card-led-rgb),.9));
+}
+@media(hover:hover) {
+  .shop-card:hover {
+    box-shadow:var(--card-led-glow);
+  }
+  .shop-card:hover::before,.shop-card:hover::after {
+    opacity:1;
+    animation:sectionLedSweep .45s linear forwards;
+  }
+}
+.shop-card:has(:focus-visible) {
+  --card-led-glow:0 0 40px rgba(var(--card-led-rgb),.50),0 0 70px rgba(var(--card-led-rgb),1);
+  box-shadow:var(--card-led-glow);
+}
+.shop-card:has(:focus-visible)::before,.shop-card:has(:focus-visible)::after {
+  opacity:1;
+  animation:sectionLedSweep .45s linear forwards;
+}
+/* Coming-soon cards fill once, then blink only while hovered. */
+@media(hover:hover) {
+  .shop-card[data-availability="coming-soon"]:hover {
+    box-shadow:var(--card-led-glow);
+    animation:cardComingSoonGlow 1.6s linear .45s infinite;
+  }
+  .shop-card[data-availability="coming-soon"]:hover::before,
+  .shop-card[data-availability="coming-soon"]:hover::after {
+    animation:sectionLedSweep .45s linear forwards,cardComingSoon 1.6s linear .45s infinite;
+  }
+}
+@keyframes cardComingSoon {
+  0%, 30%, 100% { opacity:1; }
+  42%, 94% { opacity:0; }
+}
+@keyframes cardComingSoonGlow {
+  42%, 94% { box-shadow:0 0 20px rgba(var(--card-led-rgb),0),0 0 38px rgba(var(--card-led-rgb),0); }
+  0%, 30%, 100% { box-shadow:var(--card-led-glow); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .shop-card[data-availability="coming-soon"] { animation:none !important; }
+  .shop-card::before,.shop-card::after {
+    animation:none !important;
+    --section-led-angle:180deg;
+    transition:none;
+  }
+}
+
+
+/* A slower confirmation sweep leaves enough time to read the thank-you text. */
+.question-dialog.question-success::before,
+.question-dialog.question-success::after {
+  content:"";
+  position:absolute;
+  inset:3px;
+  border-radius:21px;
+  padding:2px;
+  pointer-events:none;
+  background:conic-gradient(from 0deg,#ff786b 0deg var(--section-led-angle),transparent var(--section-led-angle) calc(360deg - var(--section-led-angle)),#ff786b calc(360deg - var(--section-led-angle)) 360deg);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  animation:sectionLedSweep 1.9s linear forwards;
+}
+.question-dialog.question-success::after { padding:4px; filter:blur(3px) drop-shadow(0 0 6px #ff1028); }
+.question-dialog.question-success.question-lock::before,
+.question-dialog.question-success.question-lock::after {
+  background:linear-gradient(90deg,#ff9b32 0 12%,transparent 12% 88%,#ff9b32 88% 100%);
+  animation:questionLockFlash 1.4s linear forwards;
+}
+.question-dialog.question-success.question-lock::after { filter:blur(3px) drop-shadow(0 0 8px #ff850b); }
+@keyframes questionLockFlash {
+  0%, 8%, 30%, 52%, 100% { opacity:0; }
+  12%, 25%, 56%, 70% { opacity:1; }
+  75% { opacity:0; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .question-dialog.question-success::before,
+  .question-dialog.question-success::after { animation:none; --section-led-angle:180deg; }
+  .question-dialog.question-success.question-lock::before,
+  .question-dialog.question-success.question-lock::after { animation:none; opacity:1; }
+}
+
+/* Homepage: leave the text areas open to the mouse glow, but shield images
+   and the final campaign panel without changing their red border animation. */
+#view-home .brand-visual,
+#view-home .home-cta .cta-panel {
+  z-index:2;
+}
+
+/* Preorder information uses the same cyan-blue LED as preorder cards. */
+#preorderInfo {
+  --button-led-core:#83f7ff;
+  --button-led-halo:#00d5ff;
+}
+#preorderInfo > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 7px rgba(0,213,255,.8));
+}
+#preorderInfo:is(:hover,:focus-visible) {
+  border-color:rgba(0,213,255,.55);
+  box-shadow:0 0 16px rgba(0,213,255,.22);
+}
+#preorderInfo:not(:disabled):active {
+  --button-led-core:#c5fbff;
+  --button-led-halo:#00d5ff;
+  border-color:#83f7ff;
+  box-shadow:inset 0 0 15px rgba(0,213,255,.2),0 0 6px rgba(0,213,255,.65),0 0 24px rgba(0,174,255,.4);
+}
+#preorderInfo:not(:disabled):active > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 10px rgba(0,213,255,.95));
+}
+
+/* Highlight preorder information while browsing a preorder card. */
+@media(hover:hover) {
+  #view-shop:has(.shop-card[data-availability="preorder"]:hover) #preorderInfo {
+    border-color:rgba(0,213,255,.55);
+    box-shadow:0 0 16px rgba(0,213,255,.22);
+  }
+  #view-shop:has(.shop-card[data-availability="preorder"]:hover) #preorderInfo > .button-led-core::before,
+  #view-shop:has(.shop-card[data-availability="preorder"]:hover) #preorderInfo > .button-led-halo::before {
+    opacity:1;
+    animation:sectionLedSweep .45s linear forwards;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #view-shop:has(.shop-card[data-availability="preorder"]:hover) #preorderInfo > .button-led-core::before,
+  #view-shop:has(.shop-card[data-availability="preorder"]:hover) #preorderInfo > .button-led-halo::before {
+    animation:none;
+    --section-led-angle:180deg;
+  }
+}
+
+/* Replay the availability LED around the product dialog on every opening. */
+.product-dialog,.question-dialog { --card-led-core:#83f7ff; --card-led-rgb:0,213,255; }
+.product-dialog[open] {
+  border-color:var(--card-led-core);
+  animation:productDialogOpenGlow .45s ease-out forwards;
+}
+.product-dialog[open]::before,
+.product-dialog[open]::after {
+  content:none;
+}
+@keyframes productDialogOpenGlow {
+  from { box-shadow:0 0 0 rgba(var(--card-led-rgb),0); }
+  55% { box-shadow:0 0 24px rgba(var(--card-led-rgb),.42),0 0 44px rgba(var(--card-led-rgb),.24); }
+  to { box-shadow:0 0 20px rgba(var(--card-led-rgb),.34),0 0 38px rgba(var(--card-led-rgb),.2); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .product-dialog[open] { animation:none; box-shadow:0 0 20px rgba(var(--card-led-rgb),.34),0 0 38px rgba(var(--card-led-rgb),.2); }
+}
+
+/* Shop-card and product-dialog actions inherit the availability colour. */
+.shop-card .shop-card-actions .btn,
+.product-dialog .product-detail-actions .btn {
+  --button-led-core:var(--card-led-core);
+  --button-led-halo:rgb(var(--card-led-rgb));
+  border-color:rgba(var(--card-led-rgb),.5);
+}
+.shop-card .shop-card-actions .btn.primary,
+.product-dialog .product-detail-actions .btn.primary {
+  color:var(--card-led-core);
+  background:radial-gradient(ellipse at 50% 0%,rgba(var(--card-led-rgb),.2),transparent 72%),linear-gradient(180deg,#202d34,#141b23);
+  box-shadow:inset 0 1px 2px rgba(var(--card-led-rgb),.55),0 0 12px rgba(var(--card-led-rgb),.18);
+  text-shadow:0 0 10px rgba(var(--card-led-rgb),.25);
+}
+.shop-card .shop-card-actions .btn > .button-led-halo,
+.product-dialog .product-detail-actions .btn > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 7px rgba(var(--card-led-rgb),.8));
+}
+.shop-card .shop-card-actions .btn:not(:disabled):is(:hover,:focus-visible),
+.product-dialog .product-detail-actions .btn:not(:disabled):is(:hover,:focus-visible) {
+  border-color:var(--card-led-core);
+  box-shadow:0 0 16px rgba(var(--card-led-rgb),.25);
+}
+.shop-card .shop-card-actions .btn:not(:disabled):active,
+.product-dialog .product-detail-actions .btn:not(:disabled):active {
+  --button-led-core:var(--card-led-core);
+  --button-led-halo:rgb(var(--card-led-rgb));
+  border-color:var(--card-led-core);
+  box-shadow:inset 0 0 15px rgba(var(--card-led-rgb),.28),0 0 6px rgba(var(--card-led-rgb),.65),0 0 24px rgba(var(--card-led-rgb),.4);
+}
+.shop-card .shop-card-actions .btn:not(:disabled):active > .button-led-halo,
+.product-dialog .product-detail-actions .btn:not(:disabled):active > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 10px rgba(var(--card-led-rgb),.95));
+}
+
+/* Match the question form to its product; retain the thank-you lock sequence. */
+.question-dialog:not(.question-success) {
+  border-color:#83f7ff;
+  box-shadow:0 0 20px rgba(0,213,255,.34),0 0 38px rgba(0,213,255,.2);
+}
+
+/* Question submission keeps a blue LED regardless of product availability. */
+#sendQuestion {
+  --button-led-core:#83f7ff;
+  --button-led-halo:#00d5ff;
+  border-color:#83f7ff;
+}
+#sendQuestion > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 7px rgba(0,213,255,.8));
+}
+#sendQuestion:not(:disabled):is(:hover,:focus-visible) {
+  border-color:#83f7ff;
+  box-shadow:0 0 16px rgba(0,213,255,.25);
+}
+#sendQuestion:not(:disabled):active {
+  --button-led-core:#c5fbff;
+  --button-led-halo:#00d5ff;
+  border-color:#83f7ff;
+  box-shadow:inset 0 0 15px rgba(0,213,255,.28),0 0 6px rgba(0,213,255,.65),0 0 24px rgba(0,213,255,.4);
+}
+#sendQuestion:not(:disabled):active > .button-led-halo {
+  filter:blur(3px) drop-shadow(0 0 10px rgba(0,213,255,.95));
+}

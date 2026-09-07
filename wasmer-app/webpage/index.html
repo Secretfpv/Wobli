@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Wobli</title>
+<link rel="stylesheet" href="styles/main.css">
+<link rel="stylesheet" href="styles/account.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/shop.css">
+<link rel="stylesheet" href="styles/effects.css">
+<link rel="stylesheet" href="styles/commerce.css">
+<link rel="stylesheet" href="styles/profile.css">
+<link rel="stylesheet" href="styles/page-spacing.css">
+<link rel="stylesheet" href="styles/legal.css">
+<script src="scripts/commerce-api.js" defer></script>
+<script src="scripts/categories.js" defer></script>
+<script src="scripts/navigation.js" defer></script>
+<script src="scripts/shop.js" defer></script>
+<script src="scripts/account.js" defer></script>
+<script src="scripts/effects.js" defer></script>
+<script src="scripts/forms.js" defer></script>
+<script src="scripts/cart.js" defer></script>
+<script src="scripts/admin.js" defer></script>
+<script src="scripts/profile.js" defer></script>
+</head>
+<body>
+<div class="noise"></div>
+<div class="cursor-glow" id="cursorGlow"></div>
+
+<header>
+  <div class="shell nav">
+    <div class="brand"><span class="brand-wordmark">Wobli</span></div>
+
+    <div class="tabs">
+      <button class="led-button navtab active" data-view="home">Home<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="led-button navtab" data-view="shop">Shop<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="led-button navtab" data-view="premium">Premium<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="led-button navtab" data-view="install">Installation<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="led-button navtab" data-view="custom">Custom Lab<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="led-button navtab" data-view="projects">Projects<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <button class="navtab" data-view="cart">Cart <span id="cartBadge">0</span></button>
+      <button class="navtab" data-view="admin" id="adminTab" hidden>Manage shop</button>
+    </div>
+
+    <span id="globalAccountBadge" class="reply-badge global-account-badge" hidden></span>
+    <button class="led-button account-btn" id="accountBtn"><svg class="account-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"></circle><path d="M5.5 19.5c.45-4 2.75-6 6.5-6s6.05 2 6.5 6"></path><circle cx="12" cy="12" r="10"></circle></svg><span id="accountLabel">Log in</span><span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+  </div>
+</header>
+
+<!-- HOME -->
+<section class="view active" id="view-home">
+  <div class="hero">
+    <div class="shell">
+      <div class="hero-copy">
+        <div class="eyebrow">Designed · Printed · Made tangible</div>
+        <h1 class="hero-wordmark">Wobli</h1>
+        <p>
+          Thoughtful 3D-printed objects for everyday life, creative projects and custom ideas.
+          Browse ready-made designs or ask Wobli to turn a useful idea into something tangible.
+        </p>
+        <div class="actions">
+          <button class="led-button btn primary" data-open="shop">Explore the shop<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+          <button class="led-button btn" data-open="custom">Build something custom<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-indicator">Scroll to explore <div class="scroll-line"></div></div>
+  </div>
+
+  <div class="brand-sections">
+    <section class="brand-section">
+      <div class="brand-copy slide-left">
+        <span class="section-led-halo" aria-hidden="true"></span>
+        <div class="brand-index">01 · Curated accessories</div>
+        <h2>Useful.<br>Selected.<br>Worth buying.</h2>
+        <p>
+          Instead of hundreds of random products, the shop focuses on accessories that are genuinely useful,
+          look good and make sense for the vehicle. The idea is to filter the market for the customer.
+        </p>
+        <div class="mini">Example: mounts, storage, detailing, cockpit accessories, smart add-ons.</div>
+      </div>
+      <div class="brand-visual slide-right"></div>
+    </section>
+
+    <section class="brand-section">
+      <div class="brand-copy slide-right">
+        <span class="section-led-halo" aria-hidden="true"></span>
+        <div class="brand-index">02 · Premium upgrades</div>
+        <h2>Better quality.<br>Less compromise.</h2>
+        <p>
+          Premium items are tested, inspected and selected before they are offered. Higher-end products can be sold
+          through pre-orders or small batches instead of filling the store with cheap generic alternatives.
+        </p>
+        <div class="mini">Example: premium phone mounts, lighting systems, electronics, model-specific upgrades.</div>
+      </div>
+      <div class="brand-visual slide-left"></div>
+    </section>
+
+    <section class="brand-section">
+      <div class="brand-copy slide-left">
+        <span class="section-led-halo" aria-hidden="true"></span>
+        <div class="brand-index">03 · Professional installation</div>
+        <h2>Buy it.<br>Have it fitted.</h2>
+        <p>
+          Selected products can be purchased together with installation. The customer arrives, the product is ready,
+          and the final result is clean, tested and properly integrated into the vehicle.
+        </p>
+        <div class="mini">Example: hidden wiring, USB power, cockpit integration, lighting, trackers, mounts.</div>
+      </div>
+      <div class="brand-visual slide-right"></div>
+    </section>
+
+    <section class="brand-section">
+      <div class="brand-copy slide-right">
+        <span class="section-led-halo" aria-hidden="true"></span>
+        <div class="brand-index">04 · Custom engineering</div>
+        <h2>Can't find it?<br>Build it.</h2>
+        <p>
+          The custom lab is where electrical knowledge, programming, CAD, 3D printing and fabrication become the
+          real difference. A one-off customer problem can become a prototype — and eventually a real product.
+        </p>
+        <div class="mini">Example: custom brackets, sensor modules, BLE controls, displays, vehicle-specific parts.</div>
+      </div>
+      <div class="brand-visual slide-left"></div>
+    </section>
+  </div>
+
+  <section class="home-cta">
+    <div class="shell">
+      <div class="cta-panel fade">
+        <span class="section-led-halo" aria-hidden="true"></span>
+        <div>
+          <div class="eyebrow">Coming soon</div>
+          <h2>BUILD.<br>RIDE.<br>REPEAT.</h2>
+          <p>
+            The final version can use real customer vehicles, installation footage, short looping video
+            backgrounds and finished projects to make the homepage feel like a campaign, not a catalogue.
+          </p>
+          <div class="actions actions-centered">
+            <button class="led-button btn primary" data-open="shop">Browse shop<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+            <button class="led-button btn" data-open="custom">Start a custom project<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</section>
+
+<!-- SHOP -->
+<section class="view" id="view-shop">
+  <div class="subhero"><div class="shell">
+    <div class="eyebrow">Shop</div>
+  </div></div>
+  <div class="content"><div class="shell shop-layout">
+    <aside class="shop-sidebar" aria-label="Shop filters">
+      <h3>Find your upgrade.</h3>
+      <fieldset><legend>Your machine</legend>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="all" checked>All vehicles</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="car">Car</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="moto">Motorcycle</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="scooter">Scooter / Vespa</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="escooter">E-scooter</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="bike">Bike / E-bike</label>
+        <label class="shop-filter"><input type="checkbox" name="shopVehicle" value="other">Other</label>
+      </fieldset>
+      <fieldset><legend>Availability</legend>
+        <label class="shop-filter"><input type="checkbox" name="shopAvailability" value="all" checked>All availability</label>
+        <label class="shop-filter"><input type="checkbox" name="shopAvailability" value="in-stock">Available</label>
+        <label class="shop-filter"><input type="checkbox" name="shopAvailability" value="out-of-stock">Out of stock</label>
+        <label class="shop-filter"><input type="checkbox" name="shopAvailability" value="preorder">Preorder</label>
+        <label class="shop-filter"><input type="checkbox" name="shopAvailability" value="coming-soon">Coming soon</label>
+      </fieldset>
+      <fieldset id="shopCategoryFilters"><legend>Category</legend>
+        <label class="shop-filter"><input type="checkbox" name="shopCategory" value="all" checked>All categories</label>
+        <label class="shop-filter"><input type="checkbox" name="shopCategory" value="mounts">Mounts &amp; adapters</label>
+        <label class="shop-filter"><input type="checkbox" name="shopCategory" value="electronics">Power &amp; electronics</label>
+        <label class="shop-filter"><input type="checkbox" name="shopCategory" value="storage">Storage &amp; utility</label>
+        <label class="shop-filter"><input type="checkbox" name="shopCategory" value="care">Detailing &amp; care</label>
+      </fieldset>
+      <button class="led-button shop-reset" id="resetShopFilters" type="button">Reset filters<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+    </aside>
+    <div>
+      <div class="shop-toolbar"><div><h3 id="shopResultsTitle">All products</h3><p class="shop-count" id="shopCount" role="status"></p></div><button class="led-button shop-info-btn" type="button" id="preorderInfo">About preorders ↗<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button></div>
+      <p class="shop-concept-note">Add available items or preorders to your cart. Checkout and payment are coming later.</p>
+      <p id="shopMessage" class="commerce-status" role="status" hidden></p>
+      <div class="grid" id="shopGrid"></div>
+      <div class="shop-empty" id="shopEmpty" hidden><h3>Nothing here just yet.</h3><p>Try another filter, or tell us what you’re looking for.</p><button class="led-button btn" type="button" data-open="custom">Suggest it in Custom Lab ↗<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- CART -->
+<section class="view" id="view-cart" aria-label="Shopping cart">
+  <div class="commerce-heading shell"><div class="eyebrow">Your cart</div><p>Review your items. No orders or payments are taken yet.</p></div>
+  <div class="shell commerce-cart">
+    <div><p class="commerce-status" id="cartStatus" role="status"></p><div id="cartItems"></div></div>
+    <aside class="cart-summary"><h3>Your summary</h3><div class="summary-row"><span>Items subtotal</span><strong id="cartTotal">—</strong></div><p>CHF · Prices and availability are checked by the server.</p><button class="btn primary" id="checkoutButton" type="button" disabled><span id="checkoutButtonLabel">Checkout coming soon</span></button><p class="cart-disclaimer">Adding to cart does not reserve stock. Payment setup will be added later.</p><button class="btn" data-open="shop">Continue shopping</button></aside>
+  </div>
+</section>
+
+<!-- ADMIN: access is also enforced by the server -->
+<section class="view" id="view-profile" aria-label="Your profile">
+  <div class="shell profile-workspace">
+    <div class="commerce-heading admin-heading"><div><div class="eyebrow">Your account</div><h2 id="profileWelcome">Your space.</h2><p id="profileEmail"></p></div></div>
+    <p id="profileStatus" class="commerce-status" role="status"></p>
+    <div class="profile-layout">
+      <nav class="profile-navigation" aria-label="Profile sections">
+        <button class="btn" type="button" data-profile="home" aria-current="page"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10M9 20v-6h6v6"></path></svg>Home</button>
+        <button class="btn" type="button" data-profile="orders"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4Z"></path><path d="M8 6V4h8v2M8 11h8M8 15h5"></path></svg>My orders <span id="profileOrdersBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-profile="messages"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z"></path><path d="M8 9h8M8 12h5"></path></svg>Messages <span id="messageBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-profile="installations"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 4-4 4 4-4 4"></path><path d="m16 8-9 9"></path><path d="m4 14 6 6-3 2-5-5 2-3Z"></path></svg>Installations <span id="profileInstallationsBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-profile="custom-lab"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"></path><path d="M7.5 16h9"></path></svg>Custom Lab <span id="profileCustomLabBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-profile="personal"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c.7-5 3.3-7 8-7s7.3 2 8 7"></path></svg>Personal details</button>
+        <button class="btn" type="button" data-profile="settings"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.12 2.12-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V20.3h-3v-.08a1.7 1.7 0 0 0-1.03-1.56A1.7 1.7 0 0 0 8.8 19l-.06.06-2.12-2.12.06-.06A1.7 1.7 0 0 0 7.02 15a1.7 1.7 0 0 0-1.56-1.03H5.4v-3h.06A1.7 1.7 0 0 0 7.02 9.9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.12-2.12.06.06a1.7 1.7 0 0 0 1.88.34A1.7 1.7 0 0 0 11.71 4.7V4.6h3v.1a1.7 1.7 0 0 0 1.03 1.54 1.7 1.7 0 0 0 1.88-.34l.06-.06 2.12 2.12-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03h.08v3h-.08A1.7 1.7 0 0 0 19.4 15Z"></path></svg>Settings</button>
+        <button class="btn profile-logout" id="profileLogout" type="button"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h10v18"></path><path d="m14 3 5 3v15l-5-2V3Z"></path><path d="M9 12h4"></path><circle cx="16.5" cy="12" r=".6" fill="currentColor" stroke="none"></circle></svg>Log out</button>
+      </nav>
+      <div class="profile-content">
+        <section class="profile-panel" id="profile-home" aria-label="Profile home"><div class="eyebrow">Home</div><h3>Ready for your next upgrade.</h3><p>Keep your contact and delivery details together, and manage your account.</p><div class="profile-home-grid"><div><h4>Personal details</h4><p id="profileDetailsSummary">Add your details for future deliveries.</p><button class="btn" type="button" data-profile="personal">Edit personal details</button></div><div><h4>Your orders</h4><p>See your purchases and their payment status.</p><button class="btn" type="button" data-profile="orders">View my orders</button></div></div></section>
+        <section class="profile-panel" id="profile-orders" aria-label="Your orders" hidden><div class="eyebrow">My orders</div><h3>Your order history.</h3><p id="profileOrdersStatus" role="status"></p><div id="profileOrders" class="profile-orders"></div></section>
+        <section class="profile-panel" id="profile-messages" aria-label="Your messages" hidden><div class="eyebrow">Messages</div><h3>Your messages</h3><p id="profileMessagesStatus" role="status"></p><div id="profileMessages"></div></section>
+        <section class="profile-panel" id="profile-installations" aria-label="Installation requests" hidden><div class="eyebrow">Installations</div><h3>Your installation requests.</h3><p>Track requests made while signed in. Wobli will contact you by email to arrange a date.</p><p id="profileInstallationsStatus" role="status"></p><div id="profileInstallations"></div><button class="btn" type="button" data-open="install">Make an installation request</button></section>
+        <section class="profile-panel" id="profile-custom-lab" aria-label="Custom Lab requests" hidden><div class="eyebrow">Custom Lab</div><h3>Your ideas and custom requests.</h3><p id="profileCustomLabStatus" role="status"></p><div id="profileCustomLab"></div><button class="btn" type="button" data-open="custom">Start a Custom Lab request</button></section>
+        <section class="profile-panel" id="profile-personal" aria-label="Personal details" hidden><div class="eyebrow">Personal details</div><h3>Make delivery simpler.</h3><p>These fields are optional. Save only what you want us to keep for future deliveries.</p><form id="profileDetailsForm">
+<div class="commerce-two"><label class="commerce-field">First name<input name="name" type="text" autocomplete="given-name" maxlength="100"></label><label class="commerce-field">Surname<input name="surname" type="text" autocomplete="family-name" maxlength="100"></label><label class="commerce-field">Phone number<input name="phone" type="tel" autocomplete="tel" maxlength="40"></label><label class="commerce-field">Street and house number<input name="address" type="text" autocomplete="address-line1" maxlength="200"></label><label class="commerce-field">Apartment / extra address details<input name="address_extra" type="text" autocomplete="address-line2" maxlength="200"></label><label class="commerce-field">Postal code<input name="postal_code" type="text" autocomplete="postal-code" maxlength="24"></label><label class="commerce-field">City<input name="city" type="text" autocomplete="address-level2" maxlength="100"></label><label class="commerce-field">Country<input name="country" type="text" autocomplete="country-name" maxlength="100"></label></div><button class="btn primary" type="submit">Save personal details</button><p id="profileDetailsStatus" class="commerce-status" role="status"></p></form></section>
+        <section class="profile-panel" id="profile-settings" aria-label="Account settings" hidden><div class="eyebrow">Settings</div><h3>Keep your account up to date.</h3><p>For security, email and password changes require your current password and sign out all your sessions.</p>
+          <form id="profileEmailForm"><h4>Email address</h4><label class="commerce-field">New email address<input name="email" type="email" autocomplete="email" required maxlength="254"></label><label class="commerce-field">Current password<input name="current" type="password" autocomplete="current-password" required maxlength="128"></label><p class="commerce-help">Email verification is not connected yet. Check the spelling carefully; use the new address next time you log in.</p><button class="btn" type="submit">Update email</button><p id="profileEmailStatus" class="commerce-status" role="status"></p></form>
+          <form id="profilePasswordForm"><h4>Password</h4><label class="commerce-field">Current password<input name="current" type="password" autocomplete="current-password" required maxlength="128"></label><label class="commerce-field">New password<input name="password" type="password" autocomplete="new-password" required minlength="8" maxlength="128"></label><label class="commerce-field">Confirm new password<input name="confirmation" type="password" autocomplete="new-password" required minlength="8" maxlength="128"></label><button class="btn" type="submit">Update password</button><p id="profilePasswordStatus" class="commerce-status" role="status"></p></form>
+          <div class="profile-danger-zone"><h4>Delete account</h4><p>Permanently remove your account, profile details, requests and conversations. This cannot be undone.</p><button class="btn danger" id="deleteAccount" type="button">Delete account</button><p id="deleteAccountStatus" class="commerce-status" role="status"></p></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" id="view-admin" aria-label="Shop administration">
+  <div class="shell commerce-heading admin-heading"><div><div class="eyebrow">VOID / Shop management</div><p>Manage products, pricing and availability in one place.</p></div></div>
+  <div class="shell admin-workspace">
+    <p class="commerce-status" id="adminStatus" role="status"></p>
+    <div class="admin-layout">
+      <nav class="admin-navigation profile-navigation" aria-label="Shop management sections">
+        <button class="btn" type="button" data-admin-section="products" aria-current="page" aria-controls="admin-section-products"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7 12 3l8 4-8 4-8-4Z"></path><path d="M4 7v10l8 4 8-4V7M12 11v10"></path></svg>Products</button>
+        <button class="btn" type="button" data-admin-section="categories" aria-controls="admin-section-categories"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>Categories</button>
+        <button class="btn" type="button" data-admin-section="orders" aria-controls="admin-section-orders"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v14H4Z"></path><path d="M8 6V4h8v2M8 11h8M8 15h5"></path></svg>Orders <span id="adminOrdersBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-admin-section="messages" aria-controls="admin-section-messages"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4V5Z"></path><path d="M8 9h8M8 12h5"></path></svg>Messages <span id="adminMessagesBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-admin-section="custom-lab" aria-controls="admin-section-custom-lab"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"></path><path d="M7.5 16h9"></path></svg>Custom Lab <span id="adminCustomLabBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-admin-section="installations" aria-controls="admin-section-installations"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6 4-4 4 4-4 4"></path><path d="m16 8-9 9"></path><path d="m4 14 6 6-3 2-5-5 2-3Z"></path></svg>Installations <span id="adminInstallationsBadge" class="reply-badge" hidden></span></button>
+        <button class="btn" type="button" data-admin-section="security" aria-controls="admin-section-security"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3.2 8.5-8 10-4.8-1.5-8-5-8-10V6l8-3Z"></path><path d="m9 12 2 2 4-5"></path></svg>Security</button>
+        <button class="btn profile-logout" id="adminLogout" type="button"><svg class="profile-nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21V3h10v18"></path><path d="m14 3 5 3v15l-5-2V3Z"></path><path d="M9 12h4"></path><circle cx="16.5" cy="12" r=".6" fill="currentColor" stroke="none"></circle></svg>Log out</button>
+      </nav>
+      <div class="admin-section-content">
+      <section id="admin-section-products" aria-label="Manage products">
+        <div class="admin-stats" id="adminStats"></div>
+    <div class="admin-grid">
+      <aside class="admin-catalogue"><div class="admin-list-heading"><h3>Products</h3><button class="btn primary" id="newProduct" type="button">+ Add product</button></div>
+        <label class="commerce-field">Find a product<input id="adminSearch" type="search" placeholder="Search name or SKU"></label>
+        <label class="commerce-field">Visibility<select id="adminFilter"><option value="all">All products</option><option value="active">Published</option><option value="draft">Drafts</option><option value="archived">Archived</option></select></label>
+        <div id="adminProducts" class="admin-products"></div>
+      </aside>
+      <div class="admin-editor"><div class="admin-editor-heading"><div><div class="eyebrow">Product details</div><h3 id="editorTitle">Add a product</h3></div><span id="editorRevision" class="pill">New draft</span></div>
+        <form id="productForm">
+          <div class="commerce-two"><label class="commerce-field">Product name<input name="name" required maxlength="140" placeholder="e.g. Modular desk organizer"></label><label class="commerce-field">SKU<input name="sku" required maxlength="80" placeholder="e.g. WOBLI-001"></label></div>
+          <label class="commerce-field">Description<textarea name="description" maxlength="3000" placeholder="What it does, vehicle fit and what is included."></textarea></label>
+          <div class="commerce-two"><label class="commerce-field">Category<select name="category"><option value="mounts">Mounts &amp; adapters</option><option value="electronics">Power &amp; electronics</option><option value="storage">Storage &amp; utility</option><option value="care">Detailing &amp; care</option></select></label><label class="commerce-field">Visibility<select name="status"><option value="draft">Draft — only you can see it</option><option value="active">Published — visible in shop</option><option value="archived">Archived — hidden from shop</option></select></label></div>
+          <fieldset class="vehicle-checks"><legend>Compatible vehicles</legend><label><input type="checkbox" name="vehicle" value="car">Car</label><label><input type="checkbox" name="vehicle" value="moto">Motorcycle</label><label><input type="checkbox" name="vehicle" value="scooter">Scooter / Vespa</label><label><input type="checkbox" name="vehicle" value="escooter">E-scooter</label><label><input type="checkbox" name="vehicle" value="bike">Bike / E-bike</label><label><input type="checkbox" name="vehicle" value="other">Other</label></fieldset>
+          <div class="commerce-three"><label class="commerce-field">Availability<select name="availability" id="productAvailability"><option value="concept">Concept / coming soon</option><option value="preorder">Preorder</option><option value="stock">In stock</option></select></label><label class="commerce-field">Price (CHF)<input name="price" type="number" min="0.01" max="1000000" step="0.01" placeholder="59.90"></label><label class="commerce-field">Stock quantity<input name="stock" type="number" min="0" max="100000" step="1" value="0"></label></div>
+          <label class="commerce-field">Estimated preorder delivery<input name="lead_time" maxlength="240" placeholder="e.g. Estimated dispatch in 3–4 weeks"></label>
+          <p class="commerce-help">Concepts can be published without a price but cannot be added to cart. Preorders need a price and delivery estimate. Stock is not reserved until a future checkout is implemented.</p>
+          <div class="product-image-editor"><div id="adminImagePreview" class="admin-image-preview">No image yet</div><div><label class="commerce-field">Product images<input id="productImage" type="file" multiple accept="image/png,image/jpeg,image/webp"></label><p class="commerce-help">Up to 12 images · PNG, JPEG or WebP · 5 MB each. The cover image appears in the shop.</p><button class="btn" type="button" id="removeProductImage">Remove all images</button></div></div>
+          <p class="commerce-status" id="productStatus" role="status"></p>
+          <div class="editor-actions"><button class="btn primary" type="submit" id="saveProduct">Save product</button><button class="btn" type="button" id="resetProduct">Reset changes</button><button class="btn danger" type="button" id="archiveProduct" hidden>Archive product</button></div>
+        </form>
+      </div>
+    </div>
+      </section>
+    <section class="admin-security" id="admin-section-categories" aria-label="Manage categories" hidden><div class="eyebrow">Categories</div><h3>Organize your shop.</h3><p>Create or rename shop categories. To remove a category, first move its products to another category, including drafts and archived products.</p><form id="newCategoryForm" class="category-form"><label class="commerce-field">New category<input name="name" required maxlength="80" placeholder="e.g. Lighting"></label><button class="btn" type="submit">Add category</button></form><p id="categoryStatus" class="commerce-status" role="status"></p><div id="adminCategories"></div></section>
+    <section class="admin-security" id="admin-section-orders" aria-label="Manage orders" hidden><div class="eyebrow">Orders</div><h3>Customer orders.</h3><p>Open an order to see its customer, delivery address, products, payment and fulfilment status.</p><button id="refreshOrders" class="btn" type="button">Refresh orders</button><p id="adminOrdersStatus" class="commerce-status" role="status"></p><div id="adminOrders" class="admin-orders"></div></section>
+    <section class="admin-security" id="admin-section-messages" aria-label="Customer messages" hidden><div class="eyebrow">Messages</div><h3>Customer conversations.</h3><p>Private questions from signed-in accounts. Email addresses are not verified. Latest 500 questions.</p><button id="refreshQuestions" class="btn" type="button">Refresh questions</button><div id="adminQuestions"></div></section>
+    <section class="admin-security" id="admin-section-custom-lab" aria-label="Custom Lab requests" hidden><div class="eyebrow">Custom Lab</div><h3>Ideas and custom requests.</h3><p>Choose a client, then open a request to review it and update its status.</p><button id="refreshCustomLab" class="btn" type="button">Refresh requests</button><div id="adminCustomLab"></div></section>
+    <section class="admin-security" id="admin-section-installations" aria-label="Installation requests" hidden><div class="eyebrow">Installations</div><h3>Installation requests.</h3><p>Choose a client, then open a request to view its details and update its status.</p><button id="refreshInstallations" class="btn" type="button">Refresh requests</button><div id="adminInstallations"></div></section>
+    <section class="admin-security" id="admin-section-security" aria-label="Admin security" hidden><div class="eyebrow">Security</div><h3>Change your password.</h3><p>Use a unique password. Changing it signs out every admin session.</p><form id="adminPasswordForm"><label class="commerce-field">Current password<input name="current" type="password" autocomplete="current-password" required maxlength="128"></label><label class="commerce-field">New password<input name="new" type="password" autocomplete="new-password" required minlength="12" maxlength="128"></label><button class="btn" type="submit">Change password</button><p id="passwordStatus" role="status"></p></form></section>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PREMIUM -->
+<section class="view" id="view-premium">
+  <div class="subhero"><div class="shell">
+    <div class="eyebrow">Premium</div><h2>Better parts.<br>Fewer compromises.</h2>
+    <p>Premium collection window.</p>
+  </div></div>
+  <div class="content"><div class="shell split">
+    <div class="panel"><div class="eyebrow">Quality</div><h3>Tested before listing.</h3><p>Example text about quality checks, fitment and product selection.</p></div>
+    <div class="panel"><div class="eyebrow">Pre-order</div><h3>Limited batches.</h3><p>Example text about pre-orders and small-stock premium products.</p></div>
+  </div></div>
+</section>
+
+<!-- INSTALL -->
+<section class="view" id="view-install">
+  <div class="subhero"><div class="shell">
+    <div class="eyebrow">Installation</div><h2>Buy it.<br>Have it fitted.</h2>
+    <p>Tell us what you drive and what you want installed. We’ll contact you to arrange the details.</p>
+  </div></div>
+  <div class="content"><div class="shell split">
+    <div class="panel process-panel"><h3>Installation process</h3><div class="steps">
+      <div class="step"><span class="step-content"><b>01</b> Choose vehicle</span></div>
+      <div class="step"><span class="step-content"><b>02</b> Choose compatible product</span></div>
+      <div class="step"><span class="step-content"><b>03</b> Send your request</span></div>
+      <div class="step"><span class="step-content"><b>04</b> Arrange an appointment</span></div>
+    </div></div>
+    <div class="panel installation-request-panel request-form-panel"><div id="installStepOne"><div class="eyebrow">Step 1 of 2</div><h3>Check your vehicle</h3>
+      <form id="installVehicleForm"><label class="commerce-field">Vehicle type<select name="vehicle_type" required><option value="">Choose a vehicle</option><option value="car">Car</option><option value="moto">Motorcycle</option><option value="scooter">Scooter / Vespa</option><option value="escooter">E-scooter</option><option value="bike">Bike / E-bike</option><option value="other">Other</option></select></label><label class="commerce-field">Model<input name="vehicle_model" required maxlength="140" placeholder="e.g. BMW 3 Series G20"></label><label class="commerce-field">Year<input name="vehicle_year" required maxlength="20" inputmode="numeric" placeholder="e.g. 2022"></label><button class="btn primary" type="submit">Next</button></form></div>
+      <div id="installStepTwo" hidden><div class="eyebrow">Step 2 of 2</div><h3>Request installation</h3><form id="installationRequestForm"><label class="commerce-field">Product to install<select name="product_id" id="installationProduct" required><option value="">Choose a product</option></select></label><label class="commerce-field">Where should it be mounted? <span class="commerce-help">Optional</span><textarea name="comment" maxlength="1000" rows="4" placeholder="Tell us your preferred location or any useful details."></textarea></label><p>Wobli will contact you as soon as possible to find a suitable date.</p><div class="actions"><button class="btn" type="button" id="installationBack">Back</button><button class="btn primary" type="submit">Submit request</button></div><p id="installationStatus" class="commerce-status" role="status"></p></form></div>
+      <div id="installationThanks" hidden><div class="eyebrow">Request received</div><h3>Thank you.</h3><p>Wobli will contact you as soon as possible to find a suitable installation date.</p><button class="btn" type="button" id="installationAgain">Make another request</button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- CUSTOM -->
+<section class="view" id="view-custom">
+  <div class="subhero"><div class="shell">
+    <div class="eyebrow">Custom Lab</div><h2>Can't find it?<br>Let's build it.</h2>
+    <p>Suggest a new product or request a custom-built solution.</p>
+  </div></div>
+  <div class="content"><div class="shell split">
+    <div class="panel process-panel"><h3>From idea to finished part.</h3><div class="steps">
+      <div class="step"><span class="step-content"><b>01</b> Explain the problem</span></div>
+      <div class="step"><span class="step-content"><b>02</b> Technical feasibility check</span></div>
+      <div class="step"><span class="step-content"><b>03</b> Prototype / source / program</span></div>
+      <div class="step"><span class="step-content"><b>04</b> Test and finish</span></div>
+    </div></div>
+    <div class="panel request-form-panel"><h3>Start a request</h3>
+      <form id="customLabForm"><label class="commerce-field">Request type<select name="request_type" id="customLabType" required><option value="new_product">New product suggestion</option><option value="custom_product">Custom product request</option></select></label><div id="newProductFields"><label class="commerce-field">Product name or idea<input name="product_name" maxlength="140" placeholder="What should we add to the shop?"></label></div><div id="customProductFields" hidden><label class="commerce-field">Vehicle category<select name="vehicle_type"><option value="">Choose a vehicle</option><option value="car">Car</option><option value="moto">Motorcycle</option><option value="scooter">Scooter / Vespa</option><option value="escooter">E-scooter</option><option value="bike">Bike / E-bike</option><option value="other">Other</option></select></label><label class="commerce-field">Model<input name="vehicle_model" maxlength="140"></label><label class="commerce-field">Year<input name="vehicle_year" maxlength="20" inputmode="numeric" placeholder="e.g. 2022"></label><label class="commerce-field">Approximate budget<input name="budget" maxlength="100" placeholder="e.g. CHF 500"></label></div><label class="commerce-field">Description<textarea name="description" required maxlength="3000" rows="6" placeholder="Describe the product idea or custom result you want."></textarea></label><p>Wobli will review your request and contact you by email.</p><button class="btn primary" type="submit">Send request</button><p id="customLabStatus" class="commerce-status" role="status"></p></form><div id="customLabThanks" hidden><div class="eyebrow">Request received</div><h3>Thank you.</h3><p>Wobli will review your idea and contact you as soon as possible.</p><button class="btn" type="button" id="customLabAgain">Send another request</button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- PROJECTS -->
+<section class="view" id="view-projects">
+  <div class="subhero"><div class="shell">
+    <div class="eyebrow">Projects</div><h2>Real builds.<br>Real solutions.</h2>
+    <p>Example portfolio window for finished projects and prototypes.</p>
+  </div></div>
+  <div class="content"><div class="shell grid">
+    <div class="card"><div class="placeholder">Example project image</div><div class="card-body"><h3>Example project 01</h3><p>Custom installation example.</p></div></div>
+    <div class="card"><div class="placeholder">Example project image</div><div class="card-body"><h3>Example project 02</h3><p>Electronics / programming example.</p></div></div>
+    <div class="card"><div class="placeholder">Example project image</div><div class="card-body"><h3>Example project 03</h3><p>Model-specific fabricated part example.</p></div></div>
+  </div></div>
+</section>
+
+<!-- Draft legal notices: complete the operator and hosting details before launch. -->
+<section class="view" id="view-terms" aria-label="Terms and conditions">
+  <div class="subhero"><div class="shell"><div class="eyebrow">Terms &amp; Conditions</div></div></div>
+  <div class="content"><div class="shell"><article class="panel legal-document">
+    <h2>Terms &amp; Conditions</h2><p class="legal-date">Draft · Version 2026-09-07</p>
+    <aside class="legal-notice"><strong>Complete before public launch.</strong><p>The operator’s legal name, full postal address, shipping areas and costs must still be added and the finished terms should be reviewed for the countries where Wobli sells.</p></aside>
+    <h3>1. About Wobli</h3><p>Wobli is a project for 3D-printed objects. The legal operator, contact details and full business address will be added before launch.</p>
+    <h3>2. Orders and payment</h3><p>Online ordering and payment are not yet available. These terms will be completed when a payment provider and fulfilment process are configured.</p>
+    <h3>3. Products and preorders</h3><p>Availability labels distinguish stocked, out-of-stock, coming-soon and preorder products. A preorder may have a later or estimated delivery date. Product appearance, compatibility and lead-time information must be checked before ordering. Wobli will contact the customer if a material delay or compatibility issue affects the order.</p>
+    <h3>4. Accounts and conversations</h3><p>Use accurate contact information, protect your password and use only your own account. Do not send spam, unlawful material or information you are not entitled to share. Questions and replies are private to the account holder and site administration. Avoid including payment details or unnecessary sensitive information.</p>
+    <h3>5. Installation and Custom Lab</h3><p>Installation and Custom Lab forms create requests for review. A request, conversation or estimate is not a confirmed booking or final quote. Scope, compatibility, price and timing must be separately agreed before work begins. Clearly personalised or made-to-order items may not be eligible for voluntary cancellation once production has started, subject to mandatory consumer rights.</p>
+    <h3>6. Cancellations, returns and refunds</h3><p>The cancellation, return and refund process will be published before online orders are enabled.</p>
+    <h3>7. Return condition and costs</h3><p>For an approved voluntary return, the product must be unused, complete and safely packaged unless it is being returned because of a defect or Wobli error. The customer pays return shipping when informed and permitted by applicable law. No product should be sent back until return instructions have been provided.</p>
+    <h3>8. Privacy and updates</h3><p>See the Privacy Policy for account, order, delivery, payment and message data. The policy version accepted at checkout and its acceptance time are stored with the order. Contact details and the legal operator must be verified before these notices are treated as final.</p>
+    <button class="btn" type="button" data-open="privacy">Read Privacy Policy</button>
+  </article></div></div>
+</section>
+<section class="view" id="view-privacy" aria-label="Privacy policy">
+  <div class="subhero"><div class="shell"><div class="eyebrow">Privacy Policy</div></div></div>
+  <div class="content"><div class="shell"><article class="panel legal-document">
+    <h2>Privacy Policy</h2><p class="legal-date">Draft · Updated 31 August 2026</p>
+    <aside class="legal-notice"><strong>Details to complete before public launch.</strong><p>Confirm the responsible operator’s legal name, postal address and working privacy contact, the hosting and backup providers and countries, any international-transfer safeguards, and data-retention periods. This draft describes the current application, not a verified live hosting setup.</p></aside>
+    <h3>1. Who is responsible?</h3><p>Wobli is the project name. The responsible person or legal entity, contact details and full postal address will be specified before launch.</p>
+    <h3>2. Information processed</h3><p>Account data includes your email address and a hashed password. Profile data and conversations can include information you submit, timestamps and read status. Session and login-attempt records support account security.</p>
+    <h3>3. Why it is used</h3><p>This information is used to authenticate accounts, take and fulfil orders, process payments, provide order updates, answer messages and service requests, send transactional emails, prevent misuse and meet legal record-keeping duties.</p>
+    <h3>4. Cookies and browser storage</h3><p>The app uses login cookies with an eight-hour lifetime. Your cart and whether you have seen the preorder introduction are saved in your browser’s local storage until cleared. Clearing storage can reset your cart and preferences; blocking login cookies prevents signed-in features. No advertising or analytics trackers are included in the current application code. Any tracking added later needs a fresh review and updated notice.</p>
+    <h3>5. Access and service providers</h3><p>The account holder and authorized administrators can access the relevant account and conversation information. Production service providers, locations, safeguards and backup arrangements will be documented before launch.</p>
+    <h3>6. Retention and deletion</h3><p>Account, order, policy-acceptance and conversation records are retained while needed to provide the service and comply with accounting, tax, warranty, dispute and other legal obligations. Account deletion does not require deletion of records that Wobli must lawfully retain. Exact retention and backup-deletion periods must be established before launch.</p>
+    <h3>7. Your choices and rights</h3><p>You can edit your email, password and optional profile details in Settings and Personal details. Depending on applicable law, you may request access, correction or deletion of your personal data, subject to legal exceptions. Use the verified operator contact once confirmed; identity verification may be needed to protect your information. You may also contact the relevant data-protection authority, including Switzerland’s FDPIC.</p>
+    <h3>8. Changes</h3><p>This notice must be reviewed when hosting, payments, email delivery, analytics or other data-processing features change.</p>
+    <button class="btn" type="button" data-open="terms">Read Terms &amp; Conditions</button>
+  </article></div></div>
+</section>
+
+<footer>
+  <div class="shell footer-grid">
+    <div>
+      <div class="footer-title"><span class="brand-wordmark">Wobli</span></div>
+      <div class="footer-muted">
+        Example footer text. Mobility accessories, premium upgrades, installation and custom engineering.
+      </div>
+    </div>
+    <div>
+      <div class="footer-title">Contact</div>
+      <div class="footer-contact">
+        <div><span class="footer-link"><b>Email:</b> Coming soon</span></div>
+        <div><a class="footer-link" href="tel:+41772755762"><b>Phone:</b> +41 77 275 57 62</a></div>
+        <div><a class="footer-link" href="https://www.google.com/maps/search/?api=1&amp;query=Lausanne%2C%20Switzerland" target="_blank" rel="noopener noreferrer"><b>Location:</b> Lausanne, Switzerland</a></div>
+        <div><b>Hours:</b> Example opening hours</div>
+      </div>
+    </div>
+    <div>
+      <div class="footer-title">Links</div>
+      <div class="footer-contact">
+        <div><span class="footer-link footer-social-pending" title="Profile link coming soon">Instagram · Coming soon</span></div>
+        <div><span class="footer-link footer-social-pending" title="Profile link coming soon">TikTok · Coming soon</span></div>
+        <div><button class="legal-link" type="button" data-open="terms">Terms &amp; Conditions</button></div>
+        <div><button class="legal-link" type="button" data-open="privacy">Privacy Policy</button></div>
+      </div>
+    </div>
+  </div>
+  <div class="shell footer-bottom">
+    <span>© 2026 Wobli. All rights reserved.</span>
+    <span>Local shop preview · Payments not connected</span>
+  </div>
+</footer>
+
+<button class="led-button lab-shortcut" id="labShortcut" type="button" data-open="custom" aria-label="Have an idea? Open Custom Lab"><span><small>Have an idea?</small><strong>Custom Lab</strong></span><span class="lab-arrow" aria-hidden="true">↗</span><span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+<dialog class="preorder-dialog" id="preorderDialog" aria-labelledby="preorderTitle" aria-describedby="preorderDescription">
+  <button class="led-button auth-close" type="button" id="closePreorder" aria-label="Close preorder information">×<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+  <div class="eyebrow">A quick heads-up</div>
+  <h2 id="preorderTitle">Good things.<br>Worth the wait.</h2>
+  <p id="preorderDescription">We’re starting with a preorder approach. Products marked for preorder won’t be ready to ship immediately. Expected availability and delivery details will be shown before you place an order.</p>
+  <p>Missing something? Share a product suggestion or an idea in <strong>Custom Lab</strong> and help shape the collection.</p>
+  <p class="preorder-preview">This is a shop preview. Orders and suggestions aren’t submitted online yet.</p>
+  <div class="actions"><button class="led-button btn primary" type="button" id="browsePreorders">Got it — explore the shop<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button><button class="led-button btn" type="button" id="suggestPreorder">Share an idea in Custom Lab ↗<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button></div>
+</dialog>
+
+<dialog id="productDialog" class="product-dialog" aria-labelledby="productDialogTitle">
+  <button id="closeProductDialog" class="auth-close" type="button" aria-label="Close product details">×</button>
+  <div class="product-detail-layout">
+    <div><div id="productGallery" class="product-gallery"></div><div class="product-gallery-controls"><button id="previousProductImage" class="btn" type="button" aria-label="Previous image">←</button><span id="productImageCounter" role="status"></span><button id="nextProductImage" class="btn" type="button" aria-label="Next image">→</button></div></div>
+    <div id="productDetails"></div>
+  </div>
+</dialog>
+
+<dialog id="requestSuccessDialog" class="question-dialog" aria-labelledby="requestSuccessTitle"><div class="eyebrow">Request received</div><h2 id="requestSuccessTitle" tabindex="-1">Thank you!</h2><p id="requestSuccessMessage">Wobli will contact you as soon as possible.</p></dialog>
+
+<dialog id="questionDialog" class="question-dialog" aria-labelledby="questionTitle">
+  <button id="closeQuestion" class="auth-close" type="button" aria-label="Close question window">×</button>
+  <div class="eyebrow" id="questionEyebrow">Product question</div><h2 id="questionTitle" tabindex="-1">Ask us about it.</h2><p id="questionProductName"></p>
+  <p id="questionThanks" role="status" hidden>Thank you for your message. We’ll reply as soon as possible.</p>
+  <form id="questionForm"><label class="commerce-field">Your question<textarea id="questionMessage" required maxlength="3000" rows="5" placeholder="What would you like to know?"></textarea></label><p class="commerce-help">Your question and account email are shared privately with Wobli.</p><button id="sendQuestion" class="btn primary" type="submit">Send question</button><p id="questionStatus" class="commerce-status" role="status"></p></form>
+</dialog>
+
+<dialog id="orderDetailsDialog" class="order-details-dialog" aria-labelledby="orderDetailsTitle">
+  <button id="closeOrderDetails" class="auth-close" type="button" aria-label="Close order details">×</button>
+  <div class="eyebrow">Order details</div><h2 id="orderDetailsTitle">Your order.</h2>
+  <div id="orderDetailsContent"></div>
+  <div class="order-details-actions"><button id="cancelCustomerOrder" class="btn danger" type="button">Cancel order</button><p id="cancelOrderStatus" class="commerce-status" role="status"></p></div>
+</dialog>
+
+<!-- ACCOUNT EXPERIENCE -->
+<dialog class="auth-dialog" id="accountModal" aria-labelledby="authTitle" aria-describedby="authIntro">
+  <div class="auth-layout">
+    <aside class="auth-story" aria-label="Wobli">
+      <span class="brand-wordmark auth-wordmark">Wobli</span>
+      <p class="auth-tagline">MAKE IT YOURS.</p>
+    </aside>
+    <div class="auth-content">
+      <button class="led-button auth-close" id="closeModal" type="button" aria-label="Close account window">×<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+      <div class="auth-switch" role="group" aria-label="Account options"><button class="led-button" type="button" data-auth="login" aria-pressed="true">Log in<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button><button class="led-button" type="button" data-auth="register" aria-pressed="false">Create account<span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button></div>
+      <h2 id="authTitle">Welcome back.</h2>
+      <p class="auth-intro" id="authIntro">Your next upgrade starts here. Log in to your account.</p>
+      <form class="auth-form" id="authForm">
+        
+        <label><span id="authIdentifierLabel">Email or username</span><input id="authEmail" name="email" type="text" autocomplete="username" placeholder="Email or username" required maxlength="254"></label>
+        <label id="authPasswordField">Password<span class="auth-password"><input id="authPassword" name="password" aria-label="Password" type="password" autocomplete="current-password" placeholder="Enter your password" required><button type="button" id="togglePassword" aria-label="Hold to show password" title="Hold to show password"><span class="auth-eye" aria-hidden="true"></span></button></span><span class="auth-password-hint" id="authPasswordHint" hidden>Use at least 8 characters.</span></label>
+        <label id="authConfirmField" hidden>Confirm password<input id="authConfirm" name="confirmation" type="password" autocomplete="new-password" placeholder="Repeat your password" disabled maxlength="128"></label>
+        <button class="auth-forgot" id="forgotPassword" type="button">Forgot password?</button>
+        <button class="led-button btn primary auth-submit" type="submit"><span id="authSubmitLabel">Log in</span><span aria-hidden="true">↗</span><span class="button-led-halo" aria-hidden="true"></span><span class="button-led-core" aria-hidden="true"></span></button>
+        <p class="auth-status" id="authStatus" role="status" aria-live="polite"></p>
+      </form>
+      <div class="auth-divider"><p class="auth-preview">Your account lets you send product questions. Password recovery is not connected yet.</p></div>
+    </div>
+  </div>
+</dialog>
+
+</body>
+</html>

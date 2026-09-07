@@ -1,0 +1,39 @@
+/* One compact starting position for every page, below the 78px fixed nav.
+   Keep panel/dialog eyebrows and the four homepage feature sections unchanged. */
+:root {
+  --page-label-top: 8px;
+  --page-content-gap: 12px;
+}
+
+.view > .subhero,
+#view-shop > .subhero {
+  padding: var(--page-label-top) 0 var(--page-content-gap);
+}
+
+.view > .content { padding-top: 0; }
+
+.view > .commerce-heading,
+.profile-workspace > .commerce-heading {
+  padding-top: var(--page-label-top);
+  padding-bottom: var(--page-content-gap);
+}
+
+/* Let the hero fit its content now that the decorative ring is removed. */
+.hero { align-items: flex-start; min-height: 0; }
+.hero-copy { padding-top: var(--page-label-top); padding-bottom: 64px; }
+
+.hero-copy > .eyebrow,
+.subhero > .shell > .eyebrow,
+.commerce-heading > .eyebrow,
+.commerce-heading > div > .eyebrow {
+  display: flex;
+  min-height: 20px;
+  line-height: 20px;
+  margin: 0;
+}
+
+.hero-copy > h1,
+.subhero h2,
+.commerce-heading h2 { margin-top: 8px; }
+
+.commerce-heading.admin-heading { align-items: flex-start; }

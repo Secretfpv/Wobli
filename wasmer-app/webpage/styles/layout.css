@@ -1,0 +1,121 @@
+/* FOOTER CONTACT */
+footer {
+  position:relative;
+  z-index:2;
+  border-top:1px solid var(--line);
+  background:#07090c;
+  padding:54px 0 42px;
+}
+
+.footer-grid {
+  display:grid;
+  grid-template-columns:1.1fr .9fr .9fr;
+  gap:34px
+}
+
+.footer-title {
+  font-weight:900;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  font-size:.78rem;
+  margin-bottom:12px
+}
+
+.footer-muted {
+  color:#75818c;
+  line-height:1.8;
+  font-size:.9rem
+}
+
+.footer-contact {
+  display:grid;
+  gap:8px;
+  color:#9aa6b1;
+  font-size:.9rem
+}
+
+.footer-contact b {
+  color:#fff
+}
+
+.footer-bottom {
+  margin-top:34px;
+  padding-top:22px;
+  border-top:1px solid var(--line);
+  color:#5f6b76;
+  font-size:.8rem;
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  flex-wrap:wrap
+}
+
+@media(max-width:950px) {
+  .tabs {
+    justify-content:flex-start
+  }
+  .brand {
+    display:none
+  }
+  .brand-section {
+    grid-template-columns:1fr
+  }
+  .brand-section:nth-child(even) .brand-copy,.brand-section:nth-child(even) .brand-visual {
+    order:initial
+  }
+  .grid {
+    grid-template-columns:1fr 1fr
+  }
+  .split,.footer-grid {
+    grid-template-columns:1fr
+  }
+  .hero-ring {
+    opacity:.5;
+    width:94vw;
+    height:94vw
+  }
+}
+
+@media(max-width:640px) {
+  .nav {
+    gap:8px
+  }
+  .account-btn {
+    padding:9px 11px;
+    font-size:.82rem
+  }
+  .navtab {
+    padding:9px 11px;
+    font-size:.82rem
+  }
+  h1 {
+    font-size:4.5rem
+  }
+  .grid {
+    grid-template-columns:1fr
+  }
+  .brand-copy {
+    padding:64px 24px
+  }
+  .brand-visual {
+    min-height:380px
+  }
+}
+
+/* Logo sizing only; original page layout is unchanged. */
+.brand-logo {
+  display:block;
+  width:160px;
+  height:auto
+}
+
+.hero-logo {
+  display:block;
+  width:920px;
+  max-width:100%;
+  height:auto
+}
+
+.actions-centered {
+  justify-content: center;
+}

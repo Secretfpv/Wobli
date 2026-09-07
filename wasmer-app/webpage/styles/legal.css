@@ -1,0 +1,35 @@
+/* Legal documents share the existing dark panel and page-label layout. */
+.legal-document { max-width:900px; margin:0 auto; }
+.legal-document h2 { margin:0 0 12px; font-size:clamp(1.8rem,4vw,2.8rem); }
+.legal-document h3 { font-size:1.2rem; margin:30px 0 10px; }
+.legal-document p { line-height:1.8; overflow-wrap:anywhere; }
+.legal-document .legal-date { font-size:.85rem; }
+.legal-notice { border:1px solid #ff941f66; border-radius:14px; padding:20px; margin:24px 0; background:#ff941f08; }
+.legal-notice strong { color:#ffbb6d; }
+.legal-notice p { margin-bottom:0; }
+.legal-link { background:none; border:0; color:var(--muted); font:inherit; padding:4px 0; text-align:left; cursor:pointer; text-decoration:underline; text-underline-offset:4px; }
+.legal-link:hover,.legal-link:focus-visible { color:var(--blue); }
+
+/* Footer controls fade blue; no automotive red LEDs in this section. */
+footer .button-led-core,footer .button-led-halo { display:none; }
+footer .footer-link,footer .legal-link {
+  display:inline-block;
+  color:inherit;
+  text-decoration:none;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  padding:4px 0;
+  transition:color .3s ease, text-shadow .3s ease, background-color .3s ease;
+}
+footer .footer-link:hover,footer .legal-link:hover,
+footer .footer-link:focus-visible,footer .legal-link:focus-visible {
+  color:var(--blue);
+  background-color:rgba(105,215,255,.045);
+  text-shadow:0 0 12px rgba(105,215,255,.5);
+}
+footer .footer-link:focus-visible,footer .legal-link:focus-visible { outline:1px solid var(--blue); outline-offset:4px; }
+footer .footer-social-pending { cursor:default; }
+@media(prefers-reduced-motion:reduce) {
+  footer .footer-link,footer .legal-link { transition:none; }
+}

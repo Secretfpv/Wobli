@@ -1,0 +1,2 @@
+# Wobli currently uses only Python's standard library.
+# Add future Python packages here, one per line, and rerun ./setup.sh.
