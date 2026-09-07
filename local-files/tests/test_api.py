@@ -170,11 +170,14 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn('HttpOnly', headers['Set-Cookie']); self.assertIn('SameSite=Strict', headers['Set-Cookie'])
         self.cookie = headers['Set-Cookie'].split(';')[0]; self.csrf = data['admin']['csrf']
-        product = dict(name='API test', sku='API-001', description='', category='mounts', vehicle=['car'], status='active', availability='stock', price_cents=2500, stock=3, image='', lead_time='')
+        product = dict(name='API test', sku='API-001', description='', admin_comment='Private production note', category='mounts', vehicle=['car'], status='active', availability='stock', price_cents=2500, stock=3, image='', lead_time='')
         self.assertEqual(self.request('POST', '/api/admin/products', product, **{'X-CSRF-Token': ''})[0], 403)
         self.assertEqual(self.request('POST', '/api/admin/products', product, Origin='https://evil.example')[0], 403)
         status, data, _ = self.request('POST', '/api/admin/products', product)
         self.assertEqual(status, 201); product = data['product']
+        self.assertEqual(product['admin_comment'], 'Private production note')
+        public_product = next(item for item in self.request('GET', '/api/products')[1]['products'] if item['id'] == product['id'])
+        self.assertNotIn('admin_comment', public_product)
         status, quote, _ = self.request('POST', '/api/cart/quote', {'items': [{'id': product['id'], 'quantity': 2, 'price_cents': 1}]})
         self.assertEqual(status, 200); self.assertEqual(quote['subtotal_cents'], 5000); self.assertFalse(quote['checkout_enabled'])
         product['status'] = 'archived'

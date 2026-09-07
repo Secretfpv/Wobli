@@ -170,7 +170,9 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(self.store.customer_auth('new@example.com', 'Replacement-123', 'new-password')[1]['role'], 'customer')
 
     def test_create_edit_and_persist(self):
-        p = self.store.save(self.product())
+        p = self.store.save(self.product(admin_comment='Check the first print before publishing.'))
+        self.assertEqual(self.store.products(admin=True)[0]['admin_comment'], 'Check the first print before publishing.')
+        self.assertNotIn('admin_comment', self.store.products()[0])
         p['price_cents'] = 6900
         updated = self.store.save(p, p['id'])
         self.assertEqual(updated['revision'], 2)

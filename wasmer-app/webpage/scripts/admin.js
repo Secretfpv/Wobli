@@ -125,6 +125,7 @@ function fillProduct(product = null) {
   productForm.reset(); productImages = product ? [...(product.images || (product.image ? [product.image] : []))] : [];
   if (product) {
     ['name', 'sku', 'description', 'category', 'status', 'availability', 'lead_time', 'stock'].forEach(key => { productForm.elements[key].value = product[key]; });
+    productForm.elements.admin_comment.value = product.admin_comment || '';
     productForm.elements.price.value = product.price_cents === null ? '' : (product.price_cents / 100).toFixed(2);
     productForm.querySelectorAll('[name="vehicle"]').forEach(input => { input.checked = product.vehicle.includes(input.value); });
   }
@@ -157,6 +158,7 @@ function productPayload() {
   const price = form.price.value.trim();
   return {
     name: form.name.value.trim(), sku: form.sku.value.trim(), description: form.description.value.trim(),
+    admin_comment: form.admin_comment.value.trim(),
     category: form.category.value, status: form.status.value, availability: form.availability.value,
     lead_time: form.lead_time.value.trim(), stock: Number(form.stock.value || 0),
     price_cents: price ? Math.round(Number(price) * 100) : null,
