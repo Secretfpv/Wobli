@@ -1,0 +1,7 @@
+Wobli — local administrator
+
+Username: admin
+Password: Yoc9k8PGUjgdRenPjEo0Ws68Lw0
+
+Open Admin access in the website footer. Change this generated password in the admin Security panel.
+Keep this file private. It is never served by the website.
