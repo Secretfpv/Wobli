@@ -166,25 +166,17 @@ class Handler(BaseHTTPRequestHandler):
                 order,changed=store.cancel_customer_order(account['username'],customer_order_cancel[1])
                 if changed:self.server.email_executor.submit(self.server.mailer.send_order_cancelled,order)
                 return self.json_response(200,{'order':order,'cancelled':changed})
-            customer_service_reply=re.fullmatch(r'/api/account/(installations|custom-lab)/([a-f0-9]{32})/replies',path)
+            customer_service_reply=re.fullmatch(r'/api/account/(custom-lab)/([a-f0-9]{32})/replies',path)
             if self.command=='POST' and customer_service_reply:
                 account=self.account(write=True)
                 if account['role']!='customer': raise PermissionError('A customer account is required.')
-                kind='installation' if customer_service_reply[1]=='installations' else 'custom_lab'
-                return self.json_response(201,{'id':store.reply_service_request(kind,customer_service_reply[2],self.body(),account['username'])})
+                return self.json_response(201,{'id':store.reply_service_request('custom_lab',customer_service_reply[2],self.body(),account['username'])})
             if self.command == 'POST' and path == '/api/questions':
                 account = self.account(write=True)
                 question_id=store.save_question(account['username'], self.body())
                 question=store.question_for_email(question_id)
                 if question:self.server.email_executor.submit(self.server.mailer.send_question,question)
                 return self.json_response(201, {'id': question_id})
-            if self.command == 'POST' and path == '/api/installations':
-                account = self.account()
-                if not account or account['role'] != 'customer': raise PermissionError('Log in or create an account to make an installation request.')
-                customer_email = account['username']
-                if not secrets.compare_digest(self.headers.get('X-CSRF-Token', ''), account['csrf']):
-                    raise PermissionError('Your session expired. Please log in again.')
-                return self.json_response(201, {'id': store.save_installation(self.body(), customer_email, self.client_address[0])})
             if self.command == 'POST' and path == '/api/custom-lab':
                 account = self.account()
                 if not account or account['role']!='customer': raise PermissionError('Log in or create an account to make a Custom Lab request.')
@@ -222,8 +214,6 @@ class Handler(BaseHTTPRequestHandler):
                     return self.json_response(200, {'ok': True}, 'wobli_admin=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0')
                 if self.command == 'GET' and path == '/api/admin/questions':
                     return self.json_response(200, {'questions': store.questions()})
-                if self.command == 'GET' and path == '/api/admin/installations':
-                    return self.json_response(200, {'installations': store.installations()})
                 if self.command == 'GET' and path == '/api/admin/custom-lab': return self.json_response(200, {'requests':store.custom_lab_requests()})
                 if self.command == 'GET' and path == '/api/admin/orders': return self.json_response(200, {'orders':store.admin_orders()})
                 order_match=re.fullmatch(r'/api/admin/orders/([a-f0-9]{32})',path)
@@ -234,24 +224,15 @@ class Handler(BaseHTTPRequestHandler):
                 order_read=re.fullmatch(r'/api/admin/orders/([a-f0-9]{32})/read',path)
                 if self.command=='POST' and order_read:
                     store.read_order_admin(order_read[1]);return self.json_response(200,{'ok':True})
-                service_reply=re.fullmatch(r'/api/admin/(installations|custom-lab)/([a-f0-9]{32})/replies',path)
+                service_reply=re.fullmatch(r'/api/admin/(custom-lab)/([a-f0-9]{32})/replies',path)
                 if self.command=='POST' and service_reply:
-                    kind='installation' if service_reply[1]=='installations' else 'custom_lab'
-                    return self.json_response(201,{'id':store.reply_service_request(kind,service_reply[2],self.body())})
-                service_read=re.fullmatch(r'/api/admin/(installations|custom-lab)/([a-f0-9]{32})/read',path)
+                    return self.json_response(201,{'id':store.reply_service_request('custom_lab',service_reply[2],self.body())})
+                service_read=re.fullmatch(r'/api/admin/(custom-lab)/([a-f0-9]{32})/read',path)
                 if self.command=='POST' and service_read:
-                    kind='installation' if service_read[1]=='installations' else 'custom_lab'
-                    store.read_service_admin(kind,service_read[2]); return self.json_response(200,{'ok':True})
+                    store.read_service_admin('custom_lab',service_read[2]); return self.json_response(200,{'ok':True})
                 custom_match=re.fullmatch(r'/api/admin/custom-lab/([a-f0-9]{32})',path)
                 if custom_match and self.command=='PUT': store.update_custom_lab(custom_match[1],self.body()); return self.json_response(200,{'ok':True})
                 if custom_match and self.command=='DELETE': store.delete_custom_lab(custom_match[1]); return self.json_response(200,{'ok':True})
-                installation_match = re.fullmatch(r'/api/admin/installations/([a-f0-9]{32})', path)
-                if installation_match and self.command == 'PUT':
-                    store.update_installation(installation_match[1], self.body())
-                    return self.json_response(200, {'ok': True})
-                if installation_match and self.command == 'DELETE':
-                    store.delete_installation(installation_match[1])
-                    return self.json_response(200, {'ok': True})
                 question_match = re.fullmatch(r'/api/admin/questions/([a-f0-9]{32})', path)
                 reply_match = re.fullmatch(r'/api/admin/questions/([a-f0-9]{32})/replies', path)
                 read_match = re.fullmatch(r'/api/admin/questions/([a-f0-9]{32})/read', path)
@@ -275,6 +256,8 @@ class Handler(BaseHTTPRequestHandler):
                     return self.json_response(200, {'ok': True})
                 if self.command == 'GET' and path == '/api/admin/products':
                     return self.json_response(200, {'products': store.products(admin=True)})
+                if self.command == 'GET' and path == '/api/admin/products/next-sku':
+                    return self.json_response(200, {'sku': store.next_sku()})
                 if self.command == 'POST' and path == '/api/admin/products':
                     data = self.body()
                     self.validated_image(data.get('image', ''))

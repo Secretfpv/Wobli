@@ -33,11 +33,10 @@ function bindShopFilter(input) {
   });
 }
 function renderShop() {
-  const vehicles = selectedShopFilters('shopVehicle');
   const categories = selectedShopFilters('shopCategory');
   const availability = selectedShopFilters('shopAvailability');
-  const products = shopProducts.filter(p => (!vehicles || p.vehicle.some(vehicle => vehicles.has(vehicle))) && (!categories || categories.has(p.category)) && (!availability || availability.has(productAvailabilityKey(p))));
-  document.getElementById('shopResultsTitle').textContent = !vehicles && !categories && !availability ? 'All products' : 'Your selection';
+  const products = shopProducts.filter(p => (!categories || categories.has(p.category)) && (!availability || availability.has(productAvailabilityKey(p))));
+  document.getElementById('shopResultsTitle').textContent = !categories && !availability ? 'All products' : 'Your selection';
   document.getElementById('shopCount').textContent = `${products.length} product${products.length === 1 ? '' : 's'}`;
   document.getElementById('shopEmpty').hidden = products.length > 0;
   const grid = document.getElementById('shopGrid');
@@ -101,7 +100,7 @@ function openProduct(product) {
   details.append(element('div', 'eyebrow', categoryNames[product.category]), title,
     element('span', 'pill', availabilityLabel(product)), element('div', 'product-price', product.price_cents === null ? 'Price coming soon' : money(product.price_cents)),
     descriptionWrap,
-    element('p', 'commerce-help', `Compatible vehicles: ${product.vehicle.map(v => vehicleNames[v]).join(' · ')}`), element('p', 'commerce-help', `SKU: ${product.sku}`));
+    element('p', 'commerce-help', `SKU: ${product.sku}`));
   if (product.availability === 'preorder') details.append(element('p', 'product-delivery', `Estimated delivery: ${product.lead_time}`));
   const canBuy = product.availability !== 'concept' && product.price_cents !== null && (product.availability === 'preorder' || product.stock > 0);
   const status = element('p', 'commerce-status'); status.setAttribute('role', 'status');
@@ -146,9 +145,9 @@ productDialog.addEventListener('close', () => {
   document.body.style.overflow = '';
   if (productFocus && productFocus.isConnected) productFocus.focus();
 });
-document.querySelectorAll('[name="shopVehicle"],[name="shopCategory"],[name="shopAvailability"]').forEach(bindShopFilter);
+document.querySelectorAll('[name="shopCategory"],[name="shopAvailability"]').forEach(bindShopFilter);
 document.getElementById('resetShopFilters').onclick = () => {
-  for (const name of ['shopVehicle','shopCategory','shopAvailability']) {
+  for (const name of ['shopCategory','shopAvailability']) {
     document.querySelectorAll(`[name="${name}"]`).forEach(input => { input.checked = input.value === 'all'; });
   }
   renderShop();

@@ -49,10 +49,6 @@ def validate_product(data, categories=None):
         if data.get(key) not in options:
             raise ValueError(f'Invalid {key}.')
         product[key] = data[key]
-    vehicle = data.get('vehicle')
-    if not isinstance(vehicle, list) or not vehicle or len(vehicle) > len(VEHICLES) or any(not isinstance(v, str) or v not in VEHICLES for v in vehicle):
-        raise ValueError('Choose at least one valid vehicle category.')
-    product['vehicle'] = sorted(set(vehicle))
     price = data.get('price_cents')
     if price is not None and (type(price) is not int or not 1 <= price <= 100000000):
         raise ValueError('Price must be between CHF 0.01 and CHF 1,000,000.')
@@ -94,12 +90,6 @@ class Store:
                 CREATE TABLE IF NOT EXISTS admin_question_reads(question_id TEXT PRIMARY KEY, seen_at INTEGER NOT NULL);
                 CREATE TABLE IF NOT EXISTS admin_service_reads(request_kind TEXT NOT NULL, request_id TEXT NOT NULL,
                     seen_version INTEGER NOT NULL, PRIMARY KEY(request_kind,request_id));
-                CREATE TABLE IF NOT EXISTS installation_requests(id TEXT PRIMARY KEY, email TEXT NOT NULL,
-                    customer_email TEXT, vehicle_type TEXT NOT NULL, vehicle_model TEXT NOT NULL,
-                    vehicle_year TEXT NOT NULL DEFAULT '',
-                    product_id TEXT NOT NULL, product_name TEXT NOT NULL, comment TEXT NOT NULL,
-                    status TEXT NOT NULL DEFAULT 'new', created INTEGER NOT NULL);
-                CREATE INDEX IF NOT EXISTS installations_customer ON installation_requests(customer_email,created);
                 CREATE TABLE IF NOT EXISTS custom_lab_requests(id TEXT PRIMARY KEY, email TEXT NOT NULL,
                     customer_email TEXT, request_type TEXT NOT NULL, product_name TEXT NOT NULL,
                     vehicle_type TEXT NOT NULL, vehicle_model TEXT NOT NULL, vehicle_year TEXT NOT NULL DEFAULT '', budget TEXT NOT NULL,
@@ -122,8 +112,9 @@ class Store:
                 db.executemany('INSERT INTO categories VALUES (?,?)', [('mounts', 'Mounts & adapters'), ('electronics', 'Power & electronics'), ('storage', 'Storage & utility'), ('care', 'Detailing & care')])
             if 'sender' not in {row['name'] for row in db.execute('PRAGMA table_info(question_replies)')}:
                 db.execute("ALTER TABLE question_replies ADD COLUMN sender TEXT NOT NULL DEFAULT 'admin'")
-            if 'vehicle_year' not in {row['name'] for row in db.execute('PRAGMA table_info(installation_requests)')}:
-                db.execute("ALTER TABLE installation_requests ADD COLUMN vehicle_year TEXT NOT NULL DEFAULT ''")
+            db.execute("DELETE FROM service_replies WHERE request_kind='installation'")
+            db.execute("DELETE FROM admin_service_reads WHERE request_kind='installation'")
+            db.execute('DROP TABLE IF EXISTS installation_requests')
             if 'vehicle_year' not in {row['name'] for row in db.execute('PRAGMA table_info(custom_lab_requests)')}:
                 db.execute("ALTER TABLE custom_lab_requests ADD COLUMN vehicle_year TEXT NOT NULL DEFAULT ''")
             order_columns={row['name'] for row in db.execute('PRAGMA table_info(orders)')}
@@ -171,6 +162,12 @@ class Store:
                 product.pop('admin_comment', None)
                 public_products.append(product)
         return public_products
+
+    def next_sku(self):
+        with self.connect() as db:
+            rows = db.execute("SELECT sku FROM products WHERE sku LIKE 'WOBLI-%'")
+            numbers = [int(match.group(1)) for row in rows if (match := re.fullmatch(r'WOBLI-(\d+)', row['sku'], re.IGNORECASE))]
+        return f'WOBLI-{max(numbers, default=0) + 1:03d}'
 
     def categories(self):
         with self.connect() as db:
@@ -544,16 +541,15 @@ class Store:
         with self.connect() as db:
             for reply_id in ids:
                 db.execute('UPDATE question_replies SET is_read=1 WHERE id=? AND question_id IN (SELECT id FROM questions WHERE author=?)', (reply_id, email))
-                db.execute("UPDATE service_replies SET is_read=1 WHERE id=? AND ((request_kind='installation' AND request_id IN (SELECT id FROM installation_requests WHERE customer_email=?)) OR (request_kind='custom_lab' AND request_id IN (SELECT id FROM custom_lab_requests WHERE customer_email=?)))", (reply_id,email,email))
+                db.execute("UPDATE service_replies SET is_read=1 WHERE id=? AND request_kind='custom_lab' AND request_id IN (SELECT id FROM custom_lab_requests WHERE customer_email=?)", (reply_id,email))
 
     def notification_counts(self, account):
         with self.connect() as db:
             if account['role'] == 'customer':
                 messages = db.execute("SELECT COUNT(*) FROM question_replies r JOIN questions q ON q.id=r.question_id WHERE q.author=? AND r.sender='admin' AND r.is_read=0", (account['username'],)).fetchone()[0]
-                installations = db.execute("SELECT COUNT(*) FROM service_replies r JOIN installation_requests i ON i.id=r.request_id WHERE r.request_kind='installation' AND i.customer_email=? AND r.sender='admin' AND r.is_read=0",(account['username'],)).fetchone()[0]
                 custom_lab = db.execute("SELECT COUNT(*) FROM service_replies r JOIN custom_lab_requests c ON c.id=r.request_id WHERE r.request_kind='custom_lab' AND c.customer_email=? AND r.sender='admin' AND r.is_read=0",(account['username'],)).fetchone()[0]
                 orders=db.execute("SELECT COUNT(*) FROM orders WHERE customer_email=? AND status_read=0",(account['username'],)).fetchone()[0]
-                return {'messages':messages,'installations':installations,'custom_lab':custom_lab,'orders':orders,'total':messages+installations+custom_lab+orders}
+                return {'messages':messages,'custom_lab':custom_lab,'orders':orders,'total':messages+custom_lab+orders}
             messages = 0
             for question in db.execute('SELECT id,created FROM questions'):
                 latest = db.execute('SELECT sender FROM question_replies WHERE question_id=? ORDER BY created DESC,rowid DESC LIMIT 1', (question['id'],)).fetchone()
@@ -561,10 +557,9 @@ class Store:
                 seen=db.execute('SELECT seen_at FROM admin_question_reads WHERE question_id=?',(question['id'],)).fetchone()
                 if (latest is None or latest['sender']=='customer') and not (seen and seen['seen_at']>=latest_time): messages += 1
             custom_lab = sum(not request['admin_read'] for request in self.custom_lab_requests())
-            installations = sum(not request['admin_read'] for request in self.installations())
             orders=db.execute("SELECT COUNT(*) FROM orders WHERE status='paid' AND admin_read=0").fetchone()[0]
-            return {'messages': messages, 'custom_lab': custom_lab, 'installations': installations,'orders':orders,
-                    'total': messages + custom_lab + installations + orders}
+            return {'messages': messages, 'custom_lab': custom_lab,'orders':orders,
+                    'total': messages + custom_lab + orders}
 
     def delete_question(self, question_id):
         with self.connect() as db:
@@ -572,58 +567,6 @@ class Store:
                 raise LookupError('Question not found. It may already have been deleted.')
             db.execute('DELETE FROM question_replies WHERE question_id=?', (question_id,))
             db.execute('DELETE FROM admin_question_reads WHERE question_id=?', (question_id,))
-
-    def save_installation(self, data, customer_email, address):
-        self.account_attempt('installation:' + address)
-        email = customer_email or data.get('email')
-        if not isinstance(email, str) or len(email) > 254 or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email.strip()):
-            raise ValueError('Enter a valid email address.')
-        vehicle_type, vehicle_model, vehicle_year = data.get('vehicle_type'), data.get('vehicle_model'), data.get('vehicle_year')
-        if vehicle_type not in VEHICLES:
-            raise ValueError('Choose a vehicle type.')
-        if not isinstance(vehicle_model, str) or not 1 <= len(vehicle_model.strip()) <= 140:
-            raise ValueError('Enter the vehicle model.')
-        if not isinstance(vehicle_year, str) or not 1 <= len(vehicle_year.strip()) <= 20:
-            raise ValueError('Enter the vehicle year.')
-        product_id, comment = data.get('product_id'), data.get('comment', '')
-        if not isinstance(product_id, str) or not isinstance(comment, str) or len(comment) > 1000:
-            raise ValueError('Choose a product and use a comment up to 1,000 characters.')
-        with self.connect() as db:
-            row = db.execute('SELECT * FROM products WHERE id=?', (product_id,)).fetchone()
-            if not row or self.decode(row)['status'] != 'active':
-                raise LookupError('That product is no longer available.')
-            product_name = self.decode(row)['name']
-            request_id = uuid.uuid4().hex
-            db.execute('INSERT INTO installation_requests(id,email,customer_email,vehicle_type,vehicle_model,vehicle_year,product_id,product_name,comment,status,created) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-                       (request_id, email.strip().lower(), customer_email, vehicle_type, vehicle_model.strip(), vehicle_year.strip(), product_id, product_name, comment.strip(), 'new', int(time.time())))
-        return request_id
-
-    def installations(self, customer_email=None):
-        with self.connect() as db:
-            if customer_email is None:
-                rows = db.execute('SELECT * FROM installation_requests ORDER BY created DESC,id DESC')
-            else:
-                rows = db.execute('SELECT * FROM installation_requests WHERE customer_email=? ORDER BY created DESC,id DESC', (customer_email,))
-            requests = [dict(row) for row in rows]
-            for request in requests:
-                request['replies'] = self.service_replies(db, 'installation', request['id'])
-                request['admin_read'] = self.service_admin_read(db,'installation',request)
-            return requests
-
-    def update_installation(self, request_id, data):
-        status = data.get('status')
-        if status not in {'new', 'contacted', 'scheduled', 'completed', 'cancelled'}:
-            raise ValueError('Invalid installation status.')
-        with self.connect() as db:
-            if db.execute('UPDATE installation_requests SET status=? WHERE id=?', (status, request_id)).rowcount == 0:
-                raise LookupError('Installation request not found.')
-
-    def delete_installation(self, request_id):
-        with self.connect() as db:
-            if db.execute('DELETE FROM installation_requests WHERE id=?', (request_id,)).rowcount == 0:
-                raise LookupError('Installation request not found.')
-            db.execute("DELETE FROM service_replies WHERE request_kind='installation' AND request_id=?", (request_id,))
-            db.execute("DELETE FROM admin_service_reads WHERE request_kind='installation' AND request_id=?",(request_id,))
 
     def save_custom_lab(self, data, customer_email, address):
         self.account_attempt('custom-lab:' + address)
@@ -682,19 +625,19 @@ class Store:
         return bool(seen and seen['seen_version']>=version)
 
     def read_service_admin(self, kind, request_id):
-        if kind not in {'installation','custom_lab'}: raise ValueError('Invalid request type.')
-        table='installation_requests' if kind=='installation' else 'custom_lab_requests'
+        if kind != 'custom_lab': raise ValueError('Invalid request type.')
+        table='custom_lab_requests'
         with self.connect() as db:
             if not db.execute(f'SELECT 1 FROM {table} WHERE id=?',(request_id,)).fetchone(): raise LookupError('Request not found.')
             version=1+db.execute("SELECT COUNT(*) FROM service_replies WHERE request_kind=? AND request_id=? AND sender='customer'",(kind,request_id)).fetchone()[0]
             db.execute('INSERT INTO admin_service_reads VALUES (?,?,?) ON CONFLICT(request_kind,request_id) DO UPDATE SET seen_version=excluded.seen_version',(kind,request_id,version))
 
     def reply_service_request(self, kind, request_id, data, customer_email=None):
-        if kind not in {'installation','custom_lab'}: raise ValueError('Invalid request type.')
+        if kind != 'custom_lab': raise ValueError('Invalid request type.')
         message, reply_id = data.get('message'), data.get('request_id')
         if not isinstance(message,str) or not 1 <= len(message.strip()) <= 3000: raise ValueError('Write a reply of 1–3000 characters.')
         if not isinstance(reply_id,str) or not re.fullmatch(r'[a-f0-9]{32}',reply_id): raise ValueError('Invalid reply request.')
-        table = 'installation_requests' if kind == 'installation' else 'custom_lab_requests'
+        table = 'custom_lab_requests'
         with self.connect() as db:
             db.execute('BEGIN IMMEDIATE')
             request=db.execute(f'SELECT customer_email FROM {table} WHERE id=?',(request_id,)).fetchone()
@@ -709,8 +652,7 @@ class Store:
                 if count>=30: raise TimeoutError('You can send up to 30 replies per hour. Please try again later.')
             db.execute('INSERT INTO service_replies VALUES (?,?,?,?,?,?,?)',(reply_id,kind,request_id,message.strip(),int(time.time()),sender,int(sender=='customer')))
             if customer_email is None:
-                if kind == 'installation': db.execute("UPDATE installation_requests SET status='contacted' WHERE id=? AND status='new'",(request_id,))
-                else: db.execute("UPDATE custom_lab_requests SET status='contacted' WHERE id=? AND status='new'",(request_id,))
+                db.execute("UPDATE custom_lab_requests SET status='contacted' WHERE id=? AND status='new'",(request_id,))
         return reply_id
 
     PROFILE_LIMITS = {'name': 100, 'surname': 100, 'phone': 40, 'address': 200,
@@ -725,7 +667,7 @@ class Store:
                 'SELECT id,product_name,message,created FROM questions WHERE author=? ORDER BY created DESC, id DESC', (email,))]
             for message in messages:
                 message['replies'] = self.question_replies(db, message['id'])
-        return {'email': email, 'details': json.loads(row['data']) if row else {key: '' for key in self.PROFILE_LIMITS}, 'orders': self.customer_orders(email), 'messages': messages, 'installations': self.installations(email), 'custom_lab': self.custom_lab_requests(email)}
+        return {'email': email, 'details': json.loads(row['data']) if row else {key: '' for key in self.PROFILE_LIMITS}, 'orders': self.customer_orders(email), 'messages': messages, 'custom_lab': self.custom_lab_requests(email)}
 
     def save_customer_profile(self, email, data):
         values = {}
@@ -764,7 +706,6 @@ class Store:
                 db.execute('UPDATE customers SET email=? WHERE email=?', (new_email, email))
                 db.execute('UPDATE customer_profiles SET email=? WHERE email=?', (new_email, email))
                 db.execute('UPDATE questions SET author=? WHERE author=?', (new_email, email))
-                db.execute('UPDATE installation_requests SET customer_email=?,email=? WHERE customer_email=?', (new_email, new_email, email))
                 db.execute('UPDATE custom_lab_requests SET customer_email=?,email=? WHERE customer_email=?', (new_email, new_email, email))
                 db.execute('UPDATE orders SET customer_email=? WHERE customer_email=?', (new_email, email))
                 db.execute('UPDATE checkout_requests SET customer_email=? WHERE customer_email=?', (new_email, email))
@@ -783,17 +724,15 @@ class Store:
             if not db.execute('SELECT 1 FROM customers WHERE email=?',(email,)).fetchone():
                 raise PermissionError('Please sign in again.')
             question_ids=[row['id'] for row in db.execute('SELECT id FROM questions WHERE author=?',(email,))]
-            installation_ids=[row['id'] for row in db.execute('SELECT id FROM installation_requests WHERE customer_email=?',(email,))]
             custom_ids=[row['id'] for row in db.execute('SELECT id FROM custom_lab_requests WHERE customer_email=?',(email,))]
             for question_id in question_ids:
                 db.execute('DELETE FROM question_replies WHERE question_id=?',(question_id,))
                 db.execute('DELETE FROM admin_question_reads WHERE question_id=?',(question_id,))
-            for kind,ids in [('installation',installation_ids),('custom_lab',custom_ids)]:
+            for kind,ids in [('custom_lab',custom_ids)]:
                 for request_id in ids:
                     db.execute('DELETE FROM service_replies WHERE request_kind=? AND request_id=?',(kind,request_id))
                     db.execute('DELETE FROM admin_service_reads WHERE request_kind=? AND request_id=?',(kind,request_id))
             db.execute('DELETE FROM questions WHERE author=?',(email,))
-            db.execute('DELETE FROM installation_requests WHERE customer_email=?',(email,))
             db.execute('DELETE FROM custom_lab_requests WHERE customer_email=?',(email,))
             db.execute('DELETE FROM customer_profiles WHERE email=?',(email,))
             db.execute('DELETE FROM customer_sessions WHERE email=?',(email,))
