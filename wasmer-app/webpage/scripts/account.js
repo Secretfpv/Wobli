@@ -11,7 +11,7 @@ function setAuthMode(mode){
   const register=mode==="register", reset=mode==="reset";
   document.querySelectorAll("[data-auth]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.auth===mode)));
   document.getElementById("authTitle").textContent=reset?"Let’s get you back in.":register?"Make it yours.":"Welcome back.";
-  document.getElementById("authIntro").textContent=reset?"Enter your email to request a password reset.":register?"Create your account. Start building your own garage.":"Your next upgrade starts here. Log in to your account.";
+  document.getElementById("authIntro").textContent=reset?"Enter your email to request a password reset.":register?"Create your account and save your favorite Wobli ideas.":"Your next fun idea starts here. Log in to your account.";
   document.getElementById("authConfirmField").hidden=!register;
   authConfirm.disabled=!register;authConfirm.required=register;authConfirm.value="";authConfirm.setCustomValidity("");
   const identifier=document.getElementById("authEmail");

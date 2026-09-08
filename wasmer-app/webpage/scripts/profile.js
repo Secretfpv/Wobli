@@ -1,7 +1,6 @@
 // Customer profile: personal data is read/written only through the authenticated API.
 let profileLoadingVersion = 0;
 let unreadReplyIds = [];
-let unreadInstallationReplyIds = [];
 let unreadCustomLabReplyIds = [];
 let unreadOrderUpdates = 0;
 let activeProfileOrder = null;
@@ -13,14 +12,13 @@ function updateReplyBadge() {
   badge.textContent = unreadReplyIds.length;
   badge.hidden = !unreadReplyIds.length;
   badge.setAttribute('aria-label', `${unreadReplyIds.length} unread replies`);
-  const installationBadge=document.getElementById('profileInstallationsBadge');installationBadge.textContent=unreadInstallationReplyIds.length;installationBadge.hidden=!unreadInstallationReplyIds.length;installationBadge.setAttribute('aria-label',`${unreadInstallationReplyIds.length} unread installation replies`);
   const customBadge=document.getElementById('profileCustomLabBadge');customBadge.textContent=unreadCustomLabReplyIds.length;customBadge.hidden=!unreadCustomLabReplyIds.length;customBadge.setAttribute('aria-label',`${unreadCustomLabReplyIds.length} unread Custom Lab replies`);
   const orderBadge=document.getElementById('profileOrdersBadge');orderBadge.textContent=unreadOrderUpdates;orderBadge.hidden=!unreadOrderUpdates;orderBadge.setAttribute('aria-label',`${unreadOrderUpdates} updated orders`);
-  if (commerce.customer) updateGlobalAccountBadge(unreadReplyIds.length + unreadInstallationReplyIds.length + unreadCustomLabReplyIds.length + unreadOrderUpdates);
+  if (commerce.customer) updateGlobalAccountBadge(unreadReplyIds.length + unreadCustomLabReplyIds.length + unreadOrderUpdates);
 }
 async function markRepliesRead(section = 'messages') {
   const version = profileLoadingVersion;
-  const source = section === 'installations' ? unreadInstallationReplyIds : section === 'custom-lab' ? unreadCustomLabReplyIds : unreadReplyIds;
+  const source = section === 'custom-lab' ? unreadCustomLabReplyIds : unreadReplyIds;
   const ids = [...source];
   if (!ids.length || !commerce.customer) return;
   try {
@@ -28,8 +26,7 @@ async function markRepliesRead(section = 'messages') {
       await api('/api/account/replies/read', {method:'POST', body:JSON.stringify({ids:ids.slice(i, i + 500)})});
     }
     if (version !== profileLoadingVersion) return;
-    if(section==='installations')unreadInstallationReplyIds=unreadInstallationReplyIds.filter(id=>!ids.includes(id));
-    else if(section==='custom-lab')unreadCustomLabReplyIds=unreadCustomLabReplyIds.filter(id=>!ids.includes(id));
+    if(section==='custom-lab')unreadCustomLabReplyIds=unreadCustomLabReplyIds.filter(id=>!ids.includes(id));
     else unreadReplyIds=unreadReplyIds.filter(id=>!ids.includes(id));
     updateReplyBadge();
   } catch(error) { if (version === profileLoadingVersion) setMessage('profileMessagesStatus', error.message, true); }
@@ -38,14 +35,13 @@ async function markServiceRequestRead(ids,section) {
   if(!ids.length||!commerce.customer)return;
   try{
     for(let i=0;i<ids.length;i+=500)await api('/api/account/replies/read',{method:'POST',body:JSON.stringify({ids:ids.slice(i,i+500)})});
-    if(section==='installations')unreadInstallationReplyIds=unreadInstallationReplyIds.filter(id=>!ids.includes(id));
-    else unreadCustomLabReplyIds=unreadCustomLabReplyIds.filter(id=>!ids.includes(id));
+    unreadCustomLabReplyIds=unreadCustomLabReplyIds.filter(id=>!ids.includes(id));
     updateReplyBadge();
   }catch{ /* The next profile refresh will retry the unread state. */ }
 }
 const detailsForm = document.getElementById('profileDetailsForm');
 function profileSection(name) {
-  ['home', 'orders', 'messages', 'installations', 'custom-lab', 'personal', 'settings'].forEach(section => { document.getElementById('profile-' + section).hidden = section !== name; });
+  ['home', 'orders', 'messages', 'custom-lab', 'personal', 'settings'].forEach(section => { document.getElementById('profile-' + section).hidden = section !== name; });
   document.querySelectorAll('.profile-navigation [data-profile]').forEach(button => {
     if (button.dataset.profile === name) button.setAttribute('aria-current', 'page'); else button.removeAttribute('aria-current');
   });
@@ -126,10 +122,6 @@ function displayProfile(profile) {
   if (commerce.customer) { commerce.customer.name = profile.details.name.trim(); adminUI(); }
   displayProfileMessages(profile);
   displayProfileOrders(profile.orders || []);
-  const installations = document.getElementById('profileInstallations'); installations.replaceChildren();
-  unreadInstallationReplyIds=profile.installations.flatMap(request=>request.replies.filter(reply=>reply.sender==='admin'&&!reply.is_read).map(reply=>reply.id));
-  document.getElementById('profileInstallationsStatus').textContent = profile.installations.length ? `${profile.installations.length} installation request${profile.installations.length === 1 ? '' : 's'}.` : 'You have no installation requests from this account.';
-  profile.installations.forEach(request=>installations.append(customerServiceCard(request,'installations',request.product_name,container=>{container.append(element('p','commerce-help',`${vehicleNames[request.vehicle_type]} · ${request.vehicle_model} · ${request.vehicle_year}`));if(request.comment)container.append(element('p','',request.comment));})));
   const customLab=document.getElementById('profileCustomLab');customLab.replaceChildren();
   unreadCustomLabReplyIds=profile.custom_lab.flatMap(request=>request.replies.filter(reply=>reply.sender==='admin'&&!reply.is_read).map(reply=>reply.id));
   document.getElementById('profileCustomLabStatus').textContent=profile.custom_lab.length?`${profile.custom_lab.length} Custom Lab request${profile.custom_lab.length===1?'':'s'}.`:'You have no Custom Lab requests from this account.';
@@ -196,12 +188,11 @@ document.getElementById('cancelCustomerOrder').addEventListener('click',async()=
 });
 async function loadProfile() {
   const version = ++profileLoadingVersion;
-  unreadReplyIds = []; unreadInstallationReplyIds=[]; unreadCustomLabReplyIds=[]; unreadOrderUpdates=0; updateReplyBadge();
+  unreadReplyIds = []; unreadCustomLabReplyIds=[]; unreadOrderUpdates=0; updateReplyBadge();
   profileSection('home'); setMessage('profileStatus', 'Loading your profile…');
   document.getElementById('profileMessages').replaceChildren();
   document.getElementById('profileOrders').replaceChildren();
   document.getElementById('profileOrdersStatus').textContent = 'Loading your orders…';
-  document.getElementById('profileInstallations').replaceChildren();
   document.getElementById('profileCustomLab').replaceChildren();
   document.getElementById('profileMessagesStatus').textContent = 'Loading your messages…';
   detailsForm.reset();
@@ -219,7 +210,7 @@ async function loadProfile() {
 function clearCustomerProfile() {
   customerReplyDrafts.clear();
   profileLoadingVersion++;
-  unreadReplyIds = []; unreadInstallationReplyIds=[]; unreadCustomLabReplyIds=[]; unreadOrderUpdates=0; updateReplyBadge();
+  unreadReplyIds = []; unreadCustomLabReplyIds=[]; unreadOrderUpdates=0; updateReplyBadge();
   document.getElementById('profileMessages').replaceChildren();
   document.getElementById('profileMessagesStatus').textContent = '';
   commerce.customer = null; adminUI();

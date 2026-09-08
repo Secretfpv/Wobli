@@ -6,7 +6,8 @@ let productImages = [];
 let imagePreviewURLs = [];
 let productDirty = false;
 let savingProduct = false;
-const adminAttentionCounts = {adminMessagesBadge:0, adminCustomLabBadge:0, adminInstallationsBadge:0,adminOrdersBadge:0};
+let catalogueExpanded = false;
+const adminAttentionCounts = {adminMessagesBadge:0, adminCustomLabBadge:0,adminOrdersBadge:0};
 function updateAdminBadge(id, count, label) {
   const badge=document.getElementById(id); badge.textContent=count; badge.hidden=!count;
   badge.setAttribute('aria-label',`${count} ${label} needing attention`);
@@ -16,7 +17,7 @@ function updateAdminBadge(id, count, label) {
 
 // Switching workspaces preserves unsaved form values in their existing panels.
 function adminSection(name) {
-  ['products', 'categories', 'orders', 'messages', 'custom-lab', 'installations', 'security'].forEach(section => {
+  ['products', 'categories', 'orders', 'messages', 'custom-lab', 'security'].forEach(section => {
     document.getElementById('admin-section-' + section).hidden = section !== name;
   });
   document.querySelectorAll('[data-admin-section]').forEach(button => {
@@ -42,13 +43,15 @@ function openAdminLogin() {
   document.getElementById('authEmail').focus();
 }
 function forgetAdmin() {
-  ['adminMessagesBadge','adminCustomLabBadge','adminInstallationsBadge','adminOrdersBadge'].forEach(id=>updateAdminBadge(id,0,''));
+  ['adminMessagesBadge','adminCustomLabBadge','adminOrdersBadge'].forEach(id=>updateAdminBadge(id,0,''));
   adminMessagesLoadVersion++; adminMessageThreads = []; selectedAdminClient = null; selectedAdminThread = null; adminMessageDrafts.clear();
   document.getElementById('adminQuestions').replaceChildren();
   commerce.admin = null; adminProducts = []; productDirty = false; editingProduct = null;
   document.getElementById('adminProducts').replaceChildren();
   document.getElementById('adminStats').replaceChildren();
   productForm.reset(); productImages = []; updateImagePreview(); adminUI();
+  document.getElementById('productEditor').hidden = true;
+  document.getElementById('productCatalogue').hidden = false;
   if (document.getElementById('view-admin').classList.contains('active')) openView('shop');
 }
 document.addEventListener('admin-session-lost', forgetAdmin);
@@ -69,7 +72,7 @@ async function loadAdminProducts() {
     adminProducts = products.products;
     applyCategories(catalogue.categories); renderCategoryManager(catalogue.categories);
     renderAdminList();
-    await Promise.all([loadQuestions(), loadInstallations(), loadCustomLabRequests(),loadAdminOrders()]);
+    await Promise.all([loadQuestions(), loadCustomLabRequests(),loadAdminOrders()]);
     setMessage('adminStatus', '');
   } catch (error) { setMessage('adminStatus', error.message, true); }
 }
@@ -81,7 +84,15 @@ function renderAdminList() {
   const search = document.getElementById('adminSearch').value.toLowerCase().trim();
   const status = document.getElementById('adminFilter').value;
   const list = document.getElementById('adminProducts'); list.replaceChildren();
-  const products = adminProducts.filter(p => (status === 'all' || p.status === status) && `${p.name} ${p.sku}`.toLowerCase().includes(search));
+  const visible = catalogueExpanded || Boolean(search);
+  list.hidden = !visible;
+  const browse = document.getElementById('browseProducts');
+  browse.setAttribute('aria-expanded', String(visible));
+  browse.textContent = visible && catalogueExpanded ? 'Hide product list' : 'Browse all products';
+  if (!visible) return;
+  const products = adminProducts
+    .filter(p => (status === 'all' || p.status === status) && `${p.name} ${p.sku}`.toLowerCase().includes(search))
+    .sort((a, b) => a.sku.localeCompare(b.sku, undefined, {numeric:true, sensitivity:'base'}));
   if (!products.length) list.append(element('p', 'commerce-help', 'No matching products. Add a product or clear the search.'));
   products.forEach(product => {
     const button = actionButton('', 'admin-product-row', () => {
@@ -117,17 +128,26 @@ function updateImagePreview() {
 function syncProductRequirements() {
   const availability = productForm.elements.availability.value;
   productForm.elements.price.required = availability !== 'concept';
-  productForm.elements.lead_time.required = availability === 'preorder';
+  productForm.elements.lead_time_amount.required = availability === 'preorder';
+  productForm.elements.lead_time_amount.disabled = availability !== 'preorder';
+  productForm.elements.lead_time_unit.disabled = availability !== 'preorder';
   productForm.elements.stock.disabled = availability !== 'stock';
 }
-function fillProduct(product = null) {
+async function fillProduct(product = null) {
+  document.getElementById('productCatalogue').hidden = true;
+  document.getElementById('productEditor').hidden = false;
   editingProduct = product ? { ...product } : null;
   productForm.reset(); productImages = product ? [...(product.images || (product.image ? [product.image] : []))] : [];
   if (product) {
-    ['name', 'sku', 'description', 'category', 'status', 'availability', 'lead_time', 'stock'].forEach(key => { productForm.elements[key].value = product[key]; });
+    ['name', 'sku', 'description', 'category', 'status', 'availability', 'stock'].forEach(key => { productForm.elements[key].value = product[key]; });
+    const lead = /Approximately (\d+) (days|weeks|months)/i.exec(product.lead_time || '');
+    productForm.elements.lead_time_amount.value = lead ? lead[1] : '';
+    productForm.elements.lead_time_unit.value = lead ? lead[2].toLowerCase() : 'weeks';
     productForm.elements.admin_comment.value = product.admin_comment || '';
     productForm.elements.price.value = product.price_cents === null ? '' : (product.price_cents / 100).toFixed(2);
-    productForm.querySelectorAll('[name="vehicle"]').forEach(input => { input.checked = product.vehicle.includes(input.value); });
+  } else {
+    try { productForm.elements.sku.value = (await api('/api/admin/products/next-sku')).sku; }
+    catch { productForm.elements.sku.value = 'WOBLI-'; }
   }
   document.getElementById('editorTitle').textContent = product ? 'Edit product' : 'Add a product';
   document.getElementById('editorRevision').textContent = product ? `Revision ${product.revision}` : 'New draft';
@@ -139,13 +159,62 @@ document.getElementById('productAvailability').addEventListener('change', syncPr
 document.getElementById('adminSearch').addEventListener('input', renderAdminList);
 document.getElementById('adminFilter').addEventListener('change', renderAdminList);
 document.getElementById('newProduct').addEventListener('click', () => { if (!savingProduct && confirmDiscard()) fillProduct(); });
+document.getElementById('browseProducts').addEventListener('click', () => { catalogueExpanded = !catalogueExpanded; renderAdminList(); });
+document.getElementById('closeProductEditor').addEventListener('click', () => {
+  if (savingProduct || !confirmDiscard()) return;
+  document.getElementById('productEditor').hidden = true;
+  document.getElementById('productCatalogue').hidden = false;
+  editingProduct = null; productDirty = false; renderAdminList();
+});
 document.getElementById('resetProduct').addEventListener('click', () => { if (!savingProduct && confirmDiscard()) fillProduct(editingProduct); });
-document.getElementById('productImage').addEventListener('change', event => {
-  const files = [...event.target.files];
-  if (productImages.length + files.length > 12 || files.some(file => !['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024)) {
-    setMessage('productStatus', 'Choose up to 12 images, PNG/JPEG/WebP, each smaller than 5 MB.', true); event.target.value = ''; return;
-  }
-  productImages.push(...files); event.target.value = ''; productDirty = true; updateImagePreview();
+const PRODUCT_IMAGE_LIMIT = 5 * 1024 * 1024;
+const PRODUCT_IMAGE_SIZE = 1024;
+const PRODUCT_IMAGE_PADDING = 48;
+const PRODUCT_IMAGE_TYPES = new Set(['image/png','image/jpeg','image/webp','image/gif','image/bmp','image/avif']);
+async function productImageBitmap(file) {
+  if ('createImageBitmap' in window) return createImageBitmap(file);
+  const url = URL.createObjectURL(file), image = new Image();
+  try { await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=()=>reject(new Error('This image format cannot be read by your browser.'));image.src=url;}); return image; }
+  finally { URL.revokeObjectURL(url); }
+}
+async function normalizeProductImage(file) {
+  if (!PRODUCT_IMAGE_TYPES.has(file.type)) throw new Error(`${file.name || 'Pasted image'} uses an unsupported format.`);
+  const bitmap = await productImageBitmap(file);
+  const available=PRODUCT_IMAGE_SIZE-(PRODUCT_IMAGE_PADDING*2);
+  const scale=Math.min(available/bitmap.width,available/bitmap.height);
+  const width=Math.max(1,Math.round(bitmap.width*scale)),height=Math.max(1,Math.round(bitmap.height*scale));
+  const left=Math.round((PRODUCT_IMAGE_SIZE-width)/2),top=Math.round((PRODUCT_IMAGE_SIZE-height)/2);
+  const canvas=document.createElement('canvas');canvas.width=PRODUCT_IMAGE_SIZE;canvas.height=PRODUCT_IMAGE_SIZE;
+  const context=canvas.getContext('2d',{alpha:true});
+  context.clearRect(0,0,PRODUCT_IMAGE_SIZE,PRODUCT_IMAGE_SIZE);
+  context.imageSmoothingEnabled=true;context.imageSmoothingQuality='high';context.drawImage(bitmap,left,top,width,height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  if (bitmap.close) bitmap.close();
+  if (!blob) throw new Error('The image could not be converted to PNG.');
+  if (blob.size > PRODUCT_IMAGE_LIMIT) throw new Error(`${file.name || 'Pasted image'} could not be reduced below 5 MB.`);
+  const base=(file.name || 'pasted-image').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-') || 'image';
+  return new File([blob],`${base}.png`,{type:'image/png',lastModified:Date.now()});
+}
+async function addProductImages(files) {
+  if (!files.length) return;
+  if (productImages.length + files.length > 12) throw new Error('A product can have up to 12 images.');
+  setMessage('productStatus',`Converting ${files.length} image${files.length===1?'':'s'} to PNG…`);
+  const converted=[];
+  for (const file of files) converted.push(await normalizeProductImage(file));
+  productImages.push(...converted);productDirty=true;updateImagePreview();
+  setMessage('productStatus',`${converted.length} image${converted.length===1?'':'s'} converted to PNG and ready to save.`);
+}
+document.getElementById('productImage').addEventListener('change', async event => {
+  const files=[...event.target.files];event.target.value='';
+  try { await addProductImages(files); }
+  catch(error) { setMessage('productStatus',error.message,true); }
+});
+document.getElementById('productEditor').addEventListener('paste', async event => {
+  const files=[...event.clipboardData.items].filter(item=>item.kind==='file'&&item.type.startsWith('image/')).map(item=>item.getAsFile()).filter(Boolean);
+  if (!files.length) return;
+  event.preventDefault();
+  try { await addProductImages(files); }
+  catch(error) { setMessage('productStatus',error.message,true); }
 });
 document.getElementById('removeProductImage').addEventListener('click', () => {
   if (savingProduct) return;
@@ -153,16 +222,16 @@ document.getElementById('removeProductImage').addEventListener('click', () => {
 });
 function productPayload() {
   const form = productForm.elements;
-  const vehicle = [...productForm.querySelectorAll('[name="vehicle"]:checked')].map(input => input.value);
-  if (!vehicle.length) throw new Error('Choose at least one compatible vehicle.');
   const price = form.price.value.trim();
+  if (price && !/^\d+\.\d{2}$/.test(price)) throw new Error('Enter the price with exactly two decimals, for example 25.00.');
+  const leadTime = form.availability.value === 'preorder' ? `Approximately ${form.lead_time_amount.value} ${form.lead_time_unit.value}` : '';
   return {
     name: form.name.value.trim(), sku: form.sku.value.trim(), description: form.description.value.trim(),
     admin_comment: form.admin_comment.value.trim(),
     category: form.category.value, status: form.status.value, availability: form.availability.value,
-    lead_time: form.lead_time.value.trim(), stock: Number(form.stock.value || 0),
+    lead_time: leadTime, stock: Number(form.stock.value || 0),
     price_cents: price ? Math.round(Number(price) * 100) : null,
-    images: productImages.filter(image => typeof image === 'string'), vehicle, revision: editingProduct ? editingProduct.revision : undefined,
+    images: productImages.filter(image => typeof image === 'string'), revision: editingProduct ? editingProduct.revision : undefined,
   };
 }
 productForm.addEventListener('submit', async event => {
@@ -343,59 +412,6 @@ function appendAdminServiceReplies(card, request, endpoint, onSent) {
   form.onsubmit=async event=>{event.preventDefault();send.disabled=true;input.disabled=true;const message=input.value,requestId=crypto.randomUUID().replaceAll('-','');try{await api(`${endpoint}/${request.id}/replies`,{method:'POST',body:JSON.stringify({message,request_id:requestId})});const reply={id:requestId,message,created:Date.now()/1000,sender:'admin',is_read:0};request.replies.push(reply);show(reply);input.value='';if(request.status==='new')request.status='contacted';onSent();}catch(error){window.alert(error.message);}finally{send.disabled=false;input.disabled=false;}};
   card.append(replies,form);
 }
-
-let adminInstallationRequests = [];
-let selectedInstallationClient = null;
-let selectedInstallationRequest = null;
-async function loadInstallations() {
-  if (!commerce.admin) return;
-  const container = document.getElementById('adminInstallations');
-  try { adminInstallationRequests = (await api('/api/admin/installations')).installations; updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(request=>!request.admin_read).length,'installation requests'); renderAdminInstallations(); }
-  catch(error) { container.textContent = error.message; }
-}
-function renderAdminInstallations() {
-  const container = document.getElementById('adminInstallations'); container.replaceChildren();
-  const clients = [...new Set(adminInstallationRequests.map(request => request.email))];
-  if (!clients.includes(selectedInstallationClient)) { selectedInstallationClient = null; selectedInstallationRequest = null; }
-  const requests = adminInstallationRequests.filter(request => request.email === selectedInstallationClient);
-  const request = requests.find(item => item.id === selectedInstallationRequest);
-  function navigate(client, id = null) { selectedInstallationClient = client; selectedInstallationRequest = id;if(id){const opened=adminInstallationRequests.find(item=>item.id===id);if(opened&&!opened.admin_read){opened.admin_read=true;updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(item=>!item.admin_read).length,'installation requests');api(`/api/admin/installations/${id}/read`,{method:'POST',body:'{}'}).catch(()=>{opened.admin_read=false;updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(item=>!item.admin_read).length,'installation requests');renderAdminInstallations();});}}renderAdminInstallations(); }
-  function requestRow(item) {
-    const button = actionButton('', 'admin-message-row', () => navigate(item.email, item.id));
-    const heading=element('span','admin-message-row-heading');heading.append(element('strong','',item.product_name));if(!item.admin_read)heading.append(element('span','new-message-dot'));
-    button.append(heading, element('span', 'commerce-help', `${vehicleNames[item.vehicle_type]} · ${item.vehicle_model} · ${item.vehicle_year} · ${new Date(item.created*1000).toLocaleString()} · ${item.status}`), element('span', 'message-row-arrow', '↗'));
-    return button;
-  }
-  if (!selectedInstallationClient) {
-    container.append(element('h3', '', 'Clients'));
-    if (!clients.length) container.append(element('p', 'commerce-help', 'No installation requests yet.'));
-    clients.forEach(client => {
-      const items = adminInstallationRequests.filter(item => item.email === client);
-      const button = actionButton('', 'admin-message-row', () => navigate(client));
-      const heading=element('span','admin-message-row-heading');heading.append(element('strong','',client));const count=items.filter(item=>!item.admin_read).length;if(count)heading.append(element('span','reply-badge',String(count)));
-      button.append(heading, element('span', 'commerce-help', `${items.length} request${items.length === 1 ? '' : 's'} · Latest ${new Date(Math.max(...items.map(item=>item.created))*1000).toLocaleString()}`), element('span', 'message-row-arrow', '↗'));
-      container.append(button);
-    });
-  } else if (!request) {
-    container.append(actionButton('← All clients', 'btn', () => navigate(null)), element('h3', '', selectedInstallationClient));
-    requests.forEach(item => container.append(requestRow(item)));
-  } else {
-    const card = element('article', 'installation-card');
-    const list = document.createElement('dl');
-    [['Product',request.product_name],['Vehicle',`${vehicleNames[request.vehicle_type]} · ${request.vehicle_model} · ${request.vehicle_year}`],['Email',request.email],['Submitted',new Date(request.created*1000).toLocaleString()],['Mounting comment',request.comment || 'No comment']].forEach(([term,value]) => list.append(element('dt','',term),element('dd','',value)));
-    const label = element('label','commerce-field','Status'); const select = document.createElement('select');
-    [['new','New'],['contacted','Contacted'],['scheduled','Scheduled'],['completed','Completed'],['cancelled','Cancelled']].forEach(([value,text]) => { const option=new Option(text,value);select.append(option); }); select.value=request.status; label.append(select);
-    const status=element('p','commerce-status');
-    select.onchange=async()=>{ select.disabled=true; try { await api(`/api/admin/installations/${request.id}`,{method:'PUT',body:JSON.stringify({status:select.value})});request.status=select.value;updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(item=>!item.admin_read).length,'installation requests');status.textContent='Status updated.'; } catch(error){status.textContent=error.message;select.value=request.status;} finally{select.disabled=false;} };
-    const remove=actionButton('Delete request','btn danger',async()=>{if(!confirm('Permanently delete this installation request?'))return;remove.disabled=true;try{await api(`/api/admin/installations/${request.id}`,{method:'DELETE'});adminInstallationRequests=adminInstallationRequests.filter(item=>item.id!==request.id);updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(item=>!item.admin_read).length,'installation requests');navigate(selectedInstallationClient);}catch(error){status.textContent=error.message;remove.disabled=false;}});
-    card.append(element('h3','',request.product_name),list,label);
-    appendAdminServiceReplies(card,request,'/api/admin/installations',()=>{select.value=request.status;updateAdminBadge('adminInstallationsBadge',adminInstallationRequests.filter(item=>!item.admin_read).length,'installation requests');});
-    card.append(remove,status);
-    container.append(actionButton('← Client requests','btn',()=>navigate(selectedInstallationClient)),card);
-  }
-  decorateButtons(container);
-}
-document.getElementById('refreshInstallations').onclick = loadInstallations;
 
 let adminCustomLabRequests=[],selectedCustomLabClient=null,selectedCustomLabRequest=null;
 async function loadCustomLabRequests(){if(!commerce.admin)return;try{adminCustomLabRequests=(await api('/api/admin/custom-lab')).requests;updateAdminBadge('adminCustomLabBadge',adminCustomLabRequests.filter(request=>!request.admin_read).length,'Custom Lab requests');renderAdminCustomLab();}catch(error){document.getElementById('adminCustomLab').textContent=error.message;}}

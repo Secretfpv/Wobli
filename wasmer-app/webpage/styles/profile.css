@@ -28,21 +28,16 @@
 .profile-danger-zone { margin-top:34px; padding-top:28px; border-top:1px solid rgba(255,72,82,.22); }
 .profile-danger-zone h4 { color:#ff737c; }
 .profile-danger-zone .danger { border-color:rgba(255,72,82,.5); color:#ff8a91; }
+/* Disabled legacy cyan navigation skin.
 .profile-navigation .btn:hover .profile-nav-icon,.profile-navigation [aria-current="page"] .profile-nav-icon { opacity:1; filter:drop-shadow(0 0 5px rgba(105,215,255,.65)); }
 .profile-navigation [aria-current="page"] { border-color:var(--blue); color:var(--blue); }
 .profile-navigation .btn:not(.profile-logout) { --button-led-core:#c9f8ff; --button-led-halo:#00cfff; }
 .profile-navigation .btn:not(.profile-logout) > .button-led-halo { filter:blur(3px) drop-shadow(0 0 5px rgba(0,207,255,.7)); }
 .profile-navigation .btn:not(.profile-logout):hover,.profile-navigation .btn:not(.profile-logout):focus-visible { border-color:rgba(105,215,255,.58); background:rgba(105,215,255,.075); color:#effcff; box-shadow:inset 0 0 14px rgba(105,215,255,.055),0 0 8px rgba(105,215,255,.12); text-shadow:0 0 9px rgba(105,215,255,.45); }
 .profile-navigation .btn:not(.profile-logout):active { --button-led-core:#dffbff; --button-led-halo:#00cfff; border-color:#69d7ff; background:rgba(105,215,255,.13); color:#fff; box-shadow:inset 0 0 14px rgba(105,215,255,.13),0 0 9px rgba(105,215,255,.28); }
-
-.account-btn.active {
-  border-color:rgba(105,215,255,.58);
-  background:linear-gradient(180deg,rgba(105,215,255,.22),rgba(105,215,255,.07));
-  color:#fff;
-  text-shadow:0 0 7px #69d7ff,0 0 15px rgba(105,215,255,.58);
-  box-shadow:inset 0 0 0 1px rgba(105,215,255,.38),inset 0 0 17px rgba(105,215,255,.12),0 0 7px rgba(105,215,255,.28),0 0 18px rgba(105,215,255,.13)
-}
+.account-btn.active { border-color:rgba(105,215,255,.58); background:linear-gradient(180deg,rgba(105,215,255,.22),rgba(105,215,255,.07)); color:#fff; text-shadow:0 0 7px #69d7ff,0 0 15px rgba(105,215,255,.58); box-shadow:inset 0 0 0 1px rgba(105,215,255,.38),inset 0 0 17px rgba(105,215,255,.12),0 0 7px rgba(105,215,255,.28),0 0 18px rgba(105,215,255,.13); }
 .account-btn.active .account-icon { opacity:1; filter:drop-shadow(0 0 3px #69d7ff) drop-shadow(0 0 7px rgba(105,215,255,.55)); }
+*/
 #adminLogout { border-color:rgba(255,72,82,.42); color:#ff7b84; background:rgba(255,35,48,.035); }
 #adminLogout:hover,#adminLogout:focus-visible { border-color:#ff5e69; color:#fff; background:rgba(255,35,48,.1); box-shadow:inset 0 0 14px rgba(255,35,48,.08),0 0 8px rgba(255,35,48,.25); text-shadow:0 0 8px rgba(255,72,82,.72); }
 .profile-panel { padding:32px; }

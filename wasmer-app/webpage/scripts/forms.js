@@ -1,9 +1,4 @@
-// Installation requests are stored by the server; Custom Lab remains a preview.
-const installVehicleForm = document.getElementById('installVehicleForm');
-const installationForm = document.getElementById('installationRequestForm');
-const installStepOne = document.getElementById('installStepOne');
-const installStepTwo = document.getElementById('installStepTwo');
-const installationThanks = document.getElementById('installationThanks');
+// Custom Lab request form.
 const requestSuccessDialog=document.getElementById('requestSuccessDialog');
 let requestSuccessTimer;
 function closeRequestSuccess(){if(requestSuccessDialog.open)requestSuccessDialog.close();}
@@ -24,40 +19,6 @@ function showRequestSuccess(message){
 }
 requestSuccessDialog.addEventListener('animationend',event=>{if(event.target!==requestSuccessDialog||event.pseudoElement!=='::before')return;if(event.animationName==='sectionLedSweep')flashRequestSuccess();if(event.animationName==='questionLockFlash')closeRequestSuccess();});
 requestSuccessDialog.addEventListener('close',()=>{clearTimeout(requestSuccessTimer);requestSuccessDialog.classList.remove('question-success','question-lock');document.body.style.overflow=document.querySelector('dialog[open]')?'hidden':'';});
-async function showInstallationStepTwo() {
-  const select = document.getElementById('installationProduct');
-  const previous = select.value;
-  try {
-    const products = (await api('/api/products')).products;
-    select.replaceChildren(new Option('Choose a product', ''), ...products.map(product => new Option(product.name, product.id)));
-    if (products.some(product => product.id === previous)) select.value = previous;
-    installStepOne.hidden = true; installStepTwo.hidden = false; select.focus();
-  } catch(error) { setMessage('installationStatus', error.message, true); }
-}
-installVehicleForm.addEventListener('submit', event => { event.preventDefault(); if (installVehicleForm.reportValidity()) showInstallationStepTwo(); });
-document.getElementById('installationBack').onclick = () => { installStepTwo.hidden = true; installStepOne.hidden = false; installVehicleForm.elements.vehicle_type.focus(); };
-async function sendInstallationRequest() {
-  const button = installationForm.querySelector('[type="submit"]'); button.disabled = true; setMessage('installationStatus', 'Sending your request…');
-  const vehicle = Object.fromEntries(new FormData(installVehicleForm));
-  const request = Object.fromEntries(new FormData(installationForm));
-  try {
-    await api('/api/installations', {method:'POST', body:JSON.stringify({...vehicle,...request})});
-    installStepTwo.hidden = true; installStepOne.hidden = false; installVehicleForm.reset();
-    showRequestSuccess('Thank you for your installation request. Wobli will contact you as soon as possible to find a suitable date.');
-    installationForm.reset();
-    if (commerce.customer && document.getElementById('view-profile').classList.contains('active')) loadProfile();
-  } catch(error) { setMessage('installationStatus', error.message, true); }
-  finally { button.disabled = false; }
-}
-installationForm.addEventListener('submit', event => {
-  event.preventDefault(); if (!installationForm.reportValidity()) return;
-  if (!commerce.customer) {
-    setMessage('installationStatus', 'Log in or create an account to send this request.');
-    loginForRequest(sendInstallationRequest, 'installation request'); return;
-  }
-  sendInstallationRequest();
-});
-document.getElementById('installationAgain').onclick = () => { installationThanks.hidden = true; installStepOne.hidden = false; installVehicleForm.reset(); setMessage('installationStatus', ''); };
 const customLabForm=document.getElementById('customLabForm');
 const customLabType=document.getElementById('customLabType');
 function syncCustomLabForm(){
