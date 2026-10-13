@@ -1,8 +1,14 @@
-#local-files/.data/
-#local-files/.venv/
-#local-files/archive/previous-venv/
+# Private runtime data and credentials must never enter Git.
+local-files/.data/
+local-files/backups/
+local-files/.venv/
+local-files/archive/previous-venv/
 **/__pycache__/
 *.pyc
 .DS_Store
-#.env
+.env
+.env.*
+!.env.example
+local-files/.env
+wasmer-app/.env
 local-files/archive/previous-server-venv/
